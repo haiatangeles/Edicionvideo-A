@@ -1,11 +1,9 @@
 import React from "react";
 import {
   AbsoluteFill,
-  Html5Audio,
   OffthreadVideo,
   Sequence,
   interpolate,
-  spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
@@ -17,50 +15,28 @@ import {
   gancho,
   intro,
   lista,
+  polaroid,
   pregunta,
-  sonidos,
   titulos,
-  viajes,
   VIDEO,
-  vogue,
-  zooms,
 } from "./guion";
 import {
   BarraProgreso,
-  Brillos,
   Cierre,
   Comparativa,
   FondoPuntos,
   Gancho,
   Lista,
+  Polaroid,
   Pregunta,
   TarjetaIntro,
   TituloDidactico,
-  Viajes,
 } from "./Piezas";
-
-// Escala del vídeo según los zooms del guion, con transición suave entre uno y otro
-const useZoom = () => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const t = frame / fps;
-  let i = 0;
-  while (i + 1 < zooms.length && zooms[i + 1].en <= t) i++;
-  const anterior = i > 0 ? zooms[i - 1].escala : zooms[0].escala;
-  const p = spring({
-    frame: frame - zooms[i].en * fps,
-    fps,
-    config: { damping: 200 },
-    durationInFrames: 12,
-  });
-  return interpolate(p, [0, 1], [anterior, zooms[i].escala]);
-};
 
 export const BodaParis: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const f = (seg: number) => Math.round(seg * fps);
-  const zoom = useZoom();
 
   // Durante la intro el vídeo se encoge dentro de una tarjeta, como en la referencia
   const tarjeta = interpolate(
@@ -69,10 +45,10 @@ export const BodaParis: React.FC = () => {
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
-  const escalaVideo = interpolate(tarjeta, [0, 1], [zoom, 0.66]);
+  const escalaVideo = interpolate(tarjeta, [0, 1], [1, 0.66]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: colores.fondo }}>
+    <AbsoluteFill style={{ backgroundColor: colores.rosaClaro }}>
       <FondoPuntos style={{ opacity: tarjeta }} />
       <AbsoluteFill
         style={{
@@ -84,10 +60,11 @@ export const BodaParis: React.FC = () => {
               : undefined,
           borderRadius: tarjeta * 40,
           overflow: "hidden",
-          boxShadow: tarjeta > 0 ? "0 30px 60px rgba(92,44,32,0.3)" : undefined,
+          boxShadow:
+            tarjeta > 0 ? "0 30px 60px rgba(122,31,61,0.25)" : undefined,
         }}
       >
-        {/* Vídeo original sin filtros */}
+        {/* Vídeo original, sin filtros ni zoom */}
         <OffthreadVideo
           src={staticFile(VIDEO)}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -107,24 +84,17 @@ export const BodaParis: React.FC = () => {
         durationInFrames={f(intro.hasta - intro.desde)}
       >
         <TarjetaIntro
-          caligrafica={intro.caligrafica}
+          manuscrita={intro.manuscrita}
           titulo={intro.titulo}
           pastilla={intro.pastilla}
         />
       </Sequence>
       <Sequence
-        name="Vogue"
-        from={f(vogue.desde)}
-        durationInFrames={f(vogue.hasta - vogue.desde)}
+        name="Polaroid"
+        from={f(polaroid.desde)}
+        durationInFrames={f(pregunta.desde - polaroid.desde)}
       >
-        <Brillos texto={vogue.texto} />
-      </Sequence>
-      <Sequence
-        name="Viajes"
-        from={f(viajes.desde)}
-        durationInFrames={f(viajes.hasta - viajes.desde)}
-      >
-        <Viajes texto={viajes.texto} />
+        <Polaroid texto={polaroid.texto} />
       </Sequence>
       {titulos.map((t) => (
         <Sequence
@@ -167,20 +137,6 @@ export const BodaParis: React.FC = () => {
         <Cierre titulo={cierre.titulo} destacado={cierre.destacado} />
       </Sequence>
       <BarraProgreso />
-      {sonidos.map((s, i) => (
-        <Sequence
-          key={i}
-          name={`Sonido ${s.archivo}`}
-          from={f(s.en)}
-          durationInFrames={f(3)}
-          layout="none"
-        >
-          <Html5Audio
-            src={staticFile(`sfx/${s.archivo}.wav`)}
-            volume={s.volumen}
-          />
-        </Sequence>
-      ))}
     </AbsoluteFill>
   );
 };

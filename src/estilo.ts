@@ -1,24 +1,22 @@
-import "@fontsource/pinyon-script/400.css";
-import "@fontsource/montserrat/500-italic.css";
-import "@fontsource/montserrat/600-italic.css";
-import "@fontsource/montserrat/700-italic.css";
+import "@fontsource/anton/400.css";
+import "@fontsource/dancing-script/700.css";
+import "@fontsource/poppins/600.css";
+import "@fontsource/poppins/800.css";
 
-// Paleta de Color Palette (colores medidos en la imagen)
+// Paleta: rosado, amarillo y beige claro (+ granate solo para que el texto se lea)
 export const colores = {
-  amarillo: "#FEEDAA",
   rosa: "#FCC0C5",
-  marron: "#8B6852",
-  nude: "#FFFAEB",
-  fondo: "#F3EDDF",
-  textoOscuro: "#5C2C20",
+  rosaClaro: "#FDE3E5",
   blanco: "#FFFFFF",
+  beige: "#F3EDDF",
+  amarillo: "#FEEDAA",
+  granate: "#7A1F3D",
 };
 
 export const fuentes = {
-  caligrafica: "'Pinyon Script', cursive",
-  texto: "Montserrat, Helvetica, sans-serif",
+  titulo: "Anton, Impact, sans-serif",
+  manuscrita: "'Dancing Script', cursive",
+  texto: "Poppins, Helvetica, sans-serif",
 };
 
-export const sombraSuave = "0 10px 30px rgba(92, 44, 32, 0.22)";
-// Halo claro para que la letra caligráfica se lea encima del vídeo
-export const halo = `0 0 24px ${colores.nude}, 0 0 12px ${colores.nude}, 0 0 5px ${colores.nude}, 0 0 2px ${colores.nude}`;
+export const sombraSuave = "0 10px 30px rgba(122, 31, 61, 0.25)";
