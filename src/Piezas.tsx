@@ -29,6 +29,71 @@ export const useEntradaSalida = (retrasoFrames = 0) => {
   return { entrada, salida, opacidad: Math.min(1, entrada * 1.5) * salida };
 };
 
+// Estrellita que parpadea suavemente
+export const Destello: React.FC<{
+  x?: number;
+  derecha?: number;
+  y: number;
+  tamano?: number;
+  color?: string;
+  desfase?: number;
+}> = ({
+  x,
+  derecha,
+  y,
+  tamano = 44,
+  color = colores.amarillo,
+  desfase = 0,
+}) => {
+  const frame = useCurrentFrame();
+  const s = 0.55 + 0.45 * Math.sin((frame + desfase) / 7);
+  return (
+    <svg
+      viewBox="-50 -50 100 100"
+      style={{
+        position: "absolute",
+        left: x,
+        right: derecha,
+        top: y,
+        width: tamano,
+        height: tamano,
+        transform: `scale(${s}) rotate(${frame * 1.5}deg)`,
+        filter: `drop-shadow(0 0 6px ${colores.blanco})`,
+      }}
+    >
+      <path
+        d="M0,-50 C6,-6 6,-6 50,0 C6,6 6,6 0,50 C-6,6 -6,6 -50,0 C-6,-6 -6,-6 0,-50Z"
+        fill={color}
+      />
+    </svg>
+  );
+};
+
+// Subrayado que se dibuja de izquierda a derecha
+const Subrayado: React.FC<{ progreso: number; ancho: number }> = ({
+  progreso,
+  ancho,
+}) => {
+  const largo = ancho * 1.05;
+  return (
+    <svg
+      width={ancho}
+      height={40}
+      style={{ display: "block", margin: "-6px auto 0" }}
+    >
+      <path
+        d={`M10 26 Q ${ancho / 2} 6 ${ancho - 10} 22`}
+        fill="none"
+        stroke={colores.rosa}
+        strokeWidth={14}
+        strokeLinecap="round"
+        strokeDasharray={largo}
+        strokeDashoffset={largo * (1 - progreso)}
+      />
+    </svg>
+  );
+};
+
 export const FondoPuntos: React.FC<{ style?: React.CSSProperties }> = ({
   style,
 }) => (
@@ -121,6 +186,11 @@ export const Gancho: React.FC<{
   const a = useEntradaSalida(0);
   const b = useEntradaSalida(5);
   const c = useEntradaSalida(14);
+  const frame = useCurrentFrame();
+  const raya = interpolate(frame, [10, 26], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
   return (
     <AbsoluteFill style={{ alignItems: "center", paddingTop: 100 }}>
       <Manuscrita
@@ -141,9 +211,12 @@ export const Gancho: React.FC<{
       >
         {titulo}
       </TituloGrande>
+      <div style={{ opacity: b.salida }}>
+        <Subrayado progreso={raya} ancho={760} />
+      </div>
       <div
         style={{
-          marginTop: 28,
+          marginTop: 10,
           opacity: c.opacidad,
           transform: `scale(${c.entrada}) rotate(-3deg)`,
         }}
@@ -201,13 +274,16 @@ export const TituloDidactico: React.FC<{
   texto: string;
   color: keyof typeof fondoPorColor;
 }> = ({ texto, color }) => {
+  const frame = useCurrentFrame();
   const { entrada, opacidad } = useEntradaSalida(0);
+  const flotar = Math.sin(frame / 14) * 5;
   return (
     <AbsoluteFill style={{ alignItems: "center", paddingTop: 170 }}>
       <div
         style={{
+          position: "relative",
           opacity: opacidad,
-          transform: `translateY(${(1 - entrada) * -60}px) rotate(-2deg)`,
+          transform: `translateY(${(1 - entrada) * -60 + flotar}px) rotate(-2deg)`,
         }}
       >
         <Pastilla
@@ -217,6 +293,14 @@ export const TituloDidactico: React.FC<{
         >
           {texto}
         </Pastilla>
+        <Destello x={-26} y={-30} tamano={52} />
+        <Destello
+          derecha={-14}
+          y={-18}
+          tamano={30}
+          color={colores.rosa}
+          desfase={20}
+        />
       </div>
     </AbsoluteFill>
   );
@@ -293,7 +377,15 @@ export const Lista: React.FC<{
 };
 
 export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
+  const frame = useCurrentFrame();
   const { entrada, opacidad } = useEntradaSalida(0);
+  const letras = Math.floor(
+    interpolate(frame, [6, 36], [0, texto.length], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    }),
+  );
+  const cursor = letras < texto.length || Math.floor(frame / 15) % 2 === 0;
   return (
     <AbsoluteFill style={{ alignItems: "center", paddingTop: 150 }}>
       <div
@@ -309,7 +401,12 @@ export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
         }}
       >
         <TituloGrande tamano={84} style={{ textShadow: "none" }}>
-          {texto}
+          {texto.slice(0, letras)}
+          {/* El resto ocupa su sitio sin verse, así la tarjeta no cambia de tamaño */}
+          <span style={{ opacity: cursor ? 1 : 0, color: colores.rosa }}>
+            |
+          </span>
+          <span style={{ opacity: 0 }}>{texto.slice(letras)}</span>
         </TituloGrande>
       </div>
     </AbsoluteFill>
@@ -361,15 +458,52 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
   );
 };
 
-export const Cierre: React.FC<{ titulo: string; destacado: string }> = ({
-  titulo,
-  destacado,
-}) => {
+const Dedo: React.FC = () => (
+  <svg viewBox="0 0 64 64" width={96} height={96}>
+    <path
+      d="M24 6c3 0 5 2 5 5v17l3-1c3-1 6 1 6 4v1l3-1c3-1 6 1 6 4v1l2-1c3 0 6 2 6 5v10c0 9-7 15-16 15h-6c-5 0-9-3-11-7L9 39c-2-3 0-7 4-7 2 0 3 1 5 3l1 2V11c0-3 2-5 5-5Z"
+      fill={colores.blanco}
+      stroke={colores.granate}
+      strokeWidth={3}
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const Cierre: React.FC<{
+  titulo: string;
+  destacado: string;
+  boton: string;
+  botonPulsado: string;
+}> = ({ titulo, destacado, boton, botonPulsado }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
   const { entrada } = useEntradaSalida(0);
+  const toque = 32; // frame en que el dedo pulsa el botón
+  const llegada = spring({ frame: frame - 12, fps, config: { damping: 16 } });
+  const pulsado = frame >= toque;
+  const presion = interpolate(
+    frame,
+    [toque - 3, toque, toque + 5],
+    [1, 0.9, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    },
+  );
+  const onda = interpolate(frame, [toque, toque + 18], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const salidaDedo = interpolate(frame, [toque + 10, toque + 22], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
   return (
     <AbsoluteFill style={{ alignItems: "center", paddingTop: 200 }}>
       <div
         style={{
+          position: "relative",
           textAlign: "center",
           padding: "30px 60px 40px",
           background: colores.rosaClaro,
@@ -381,6 +515,56 @@ export const Cierre: React.FC<{ titulo: string; destacado: string }> = ({
       >
         <Manuscrita tamano={66}>{titulo}</Manuscrita>
         <TituloGrande tamano={120}>{destacado}</TituloGrande>
+        <div
+          style={{
+            position: "relative",
+            marginTop: 26,
+            display: "inline-block",
+          }}
+        >
+          {/* Onda del toque */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: 999,
+              border: `6px solid ${colores.amarillo}`,
+              transform: `scale(${1 + onda * 0.35})`,
+              opacity: onda > 0 ? 1 - onda : 0,
+            }}
+          />
+          <Pastilla
+            fondo={pulsado ? colores.amarillo : colores.granate}
+            color={pulsado ? colores.granate : colores.blanco}
+            tamano={50}
+            style={{ transform: `scale(${presion})` }}
+          >
+            {pulsado ? botonPulsado : boton}
+          </Pastilla>
+          <div
+            style={{
+              position: "absolute",
+              left: "58%",
+              top: 34,
+              transform: `translate(${(1 - llegada) * 260 + salidaDedo * 200}px, ${(1 - llegada) * 220 + salidaDedo * 160}px) scale(${pulsado && frame < toque + 5 ? 0.9 : 1})`,
+              opacity: 1 - salidaDedo,
+            }}
+          >
+            <Dedo />
+          </div>
+        </div>
+        {pulsado ? (
+          <>
+            <Destello x={-20} y={-24} tamano={56} />
+            <Destello
+              derecha={-16}
+              y={40}
+              tamano={36}
+              color={colores.rosa}
+              desfase={15}
+            />
+          </>
+        ) : null}
       </div>
     </AbsoluteFill>
   );

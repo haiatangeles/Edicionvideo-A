@@ -125,7 +125,12 @@ export const BodaParis: React.FC = () => {
         <Comparativa altoEnFrames={f(comparativa.high - comparativa.desde)} />
       </Sequence>
       <Sequence name="Cierre" from={f(cierre.desde)}>
-        <Cierre titulo={cierre.titulo} destacado={cierre.destacado} />
+        <Cierre
+          titulo={cierre.titulo}
+          destacado={cierre.destacado}
+          boton={cierre.boton}
+          botonPulsado={cierre.botonPulsado}
+        />
       </Sequence>
       <BarraProgreso />
     </AbsoluteFill>
