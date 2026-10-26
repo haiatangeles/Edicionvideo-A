@@ -15,7 +15,6 @@ import {
   gancho,
   intro,
   lista,
-  polaroid,
   pregunta,
   titulos,
   VIDEO,
@@ -27,7 +26,6 @@ import {
   FondoPuntos,
   Gancho,
   Lista,
-  Polaroid,
   Pregunta,
   TarjetaIntro,
   TituloDidactico,
@@ -88,13 +86,6 @@ export const BodaParis: React.FC = () => {
           titulo={intro.titulo}
           pastilla={intro.pastilla}
         />
-      </Sequence>
-      <Sequence
-        name="Polaroid"
-        from={f(polaroid.desde)}
-        durationInFrames={f(pregunta.desde - polaroid.desde)}
-      >
-        <Polaroid texto={polaroid.texto} />
       </Sequence>
       {titulos.map((t) => (
         <Sequence

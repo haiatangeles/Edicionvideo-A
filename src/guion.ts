@@ -19,8 +19,6 @@ export const intro = {
   pastilla: "de mi boda en París",
 };
 
-export const polaroid = { desde: 5.8, texto: "ep. 01 🤍" };
-
 // Títulos didácticos arriba del todo
 export const titulos: {
   desde: number;

@@ -1,10 +1,8 @@
 import React from "react";
 import {
   AbsoluteFill,
-  Img,
   interpolate,
   spring,
-  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
@@ -190,35 +188,6 @@ export const TarjetaIntro: React.FC<{
         <Pastilla tamano={34}>{pastilla}</Pastilla>
       </div>
     </AbsoluteFill>
-  );
-};
-
-export const Polaroid: React.FC<{ texto: string }> = ({ texto }) => {
-  const { entrada } = useEntradaSalida(0);
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: 50,
-        top: 110,
-        width: 210,
-        padding: "14px 14px 0",
-        background: colores.blanco,
-        boxShadow: sombraSuave,
-        transform: `rotate(${-8 + (1 - entrada) * -20}deg) scale(${entrada})`,
-      }}
-    >
-      <Img
-        src={staticFile("portada.jpg")}
-        style={{ width: "100%", height: 230, objectFit: "cover" }}
-      />
-      <Manuscrita
-        tamano={40}
-        style={{ textAlign: "center", padding: "4px 0 6px" }}
-      >
-        {texto}
-      </Manuscrita>
-    </div>
   );
 };
 
