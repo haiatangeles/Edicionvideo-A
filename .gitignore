@@ -9,3 +9,7 @@ out
 # Whisper (binario y modelos, se instalan con npm run whisper:instalar)
 whisper.cpp
 tmp
+public/originales
+public/mi-video.mp4
+public/referencia.mp4
+borradores

@@ -1,31 +1,23 @@
-// Todo lo visual del vídeo se ajusta aquí. Cuando llegue estilo.md, se rellena con sus reglas.
-export const estilo = {
-  colores: {
-    // Paleta pedida: rosa, blanco, beige y amarillo suave
-    fondo: "#F5E9DA", // beige
-    texto: "#FFFFFF", // blanco
-    destacado: "#F4A6C1", // rosa: palabra que se está diciendo
-    acento: "#F6E3A1", // amarillo suave
-    contorno: "#5A4A42", // marrón suave en lugar de negro
-    barra: "#F4A6C1",
-  },
-  fuente: "Arial Black, Helvetica, sans-serif",
-  gancho: {
-    texto: "Tu gancho aquí 👀",
-    duracionSeg: 3,
-    tamano: 96,
-  },
-  subtitulos: {
-    tamano: 84,
-    mayusculas: true,
-    // Las palabras que estén a menos de esto (ms) se muestran juntas
-    agruparMs: 900,
-    // Distancia desde abajo (px)
-    posicionAbajo: 520,
-  },
-  cierre: {
-    texto: "Sígueme para más ➜",
-    duracionSeg: 2.5,
-  },
-  barraProgreso: true,
-} as const;
+import "@fontsource/anton/400.css";
+import "@fontsource/dancing-script/700.css";
+import "@fontsource/poppins/600.css";
+import "@fontsource/poppins/800.css";
+
+// Paleta: rosa, blanco, beige y amarillo suave (+ granate para que el texto se lea, como en la referencia)
+export const colores = {
+  rosa: "#F4B6C9",
+  rosaClaro: "#FBE4EC",
+  blanco: "#FFFFFF",
+  beige: "#EFE2CF",
+  amarillo: "#F8E7A2",
+  granate: "#7A1F3D",
+  puntos: "#8E2A4B",
+};
+
+export const fuentes = {
+  titulo: "Anton, Impact, sans-serif",
+  manuscrita: "'Dancing Script', cursive",
+  texto: "Poppins, Helvetica, sans-serif",
+};
+
+export const sombraSuave = "0 10px 30px rgba(122, 31, 61, 0.25)";
