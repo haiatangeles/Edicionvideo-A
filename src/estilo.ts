@@ -1,11 +1,13 @@
 // Todo lo visual del vídeo se ajusta aquí. Cuando llegue estilo.md, se rellena con sus reglas.
 export const estilo = {
   colores: {
-    fondo: "#111111",
-    texto: "#FFFFFF",
-    destacado: "#FFD400", // palabra que se está diciendo
-    contorno: "#000000",
-    barra: "#FFD400",
+    // Paleta pedida: rosa, blanco, beige y amarillo suave
+    fondo: "#F5E9DA", // beige
+    texto: "#FFFFFF", // blanco
+    destacado: "#F4A6C1", // rosa: palabra que se está diciendo
+    acento: "#F6E3A1", // amarillo suave
+    contorno: "#5A4A42", // marrón suave en lugar de negro
+    barra: "#F4A6C1",
   },
   fuente: "Arial Black, Helvetica, sans-serif",
   gancho: {
