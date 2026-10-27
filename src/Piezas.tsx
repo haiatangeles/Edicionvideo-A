@@ -133,7 +133,7 @@ export const BannerVintage: React.FC<{
   </div>
 );
 
-// Títulos en Anton (mayúsculas) y textos en Poppins gruesa, como el borrador 11;
+// Títulos en Anton (mayúsculas) y textos de banner en Cormorant cursiva (borrador 12);
 // el tamaño se ajusta para que quepa en el ancho dado
 export const TextoVintage: React.FC<{
   children: string;
@@ -150,15 +150,16 @@ export const TextoVintage: React.FC<{
   color = colores.oroRosa,
   style,
 }) => {
-  const porLetra = mayusculas ? 0.5 : 0.62;
+  const porLetra = mayusculas ? 0.5 : 0.46;
   const ajustado = anchoMax
     ? Math.min(tamano, anchoMax / (children.length * porLetra))
     : tamano;
   return (
     <div
       style={{
-        fontFamily: mayusculas ? fuentes.titulo : fuentes.texto,
-        fontWeight: mayusculas ? 400 : 800,
+        fontFamily: mayusculas ? fuentes.titulo : fuentes.vintage,
+        fontWeight: mayusculas ? 400 : 700,
+        fontStyle: mayusculas ? "normal" : "italic",
         fontSize: ajustado,
         lineHeight: 1.05,
         letterSpacing: mayusculas ? 2 : 0,
@@ -176,12 +177,19 @@ export const Manuscrita: React.FC<{
   children: React.ReactNode;
   tamano?: number;
   color?: string;
+  vintage?: boolean;
   style?: React.CSSProperties;
-}> = ({ children, tamano = 70, color = colores.oroRosa, style }) => (
+}> = ({
+  children,
+  tamano = 70,
+  color = colores.oroRosa,
+  vintage = false,
+  style,
+}) => (
   <div
     style={{
-      fontFamily: fuentes.manuscrita,
-      fontWeight: 700,
+      fontFamily: vintage ? fuentes.caligrafia : fuentes.manuscrita,
+      fontWeight: vintage ? 400 : 700,
       fontSize: tamano,
       lineHeight: 1.2,
       color,
@@ -217,16 +225,14 @@ const Subrayado: React.FC<{ progreso: number; ancho: number }> = ({
   );
 };
 
-export const FondoScrapbook: React.FC<{ style?: React.CSSProperties }> = ({
+export const FondoCuadricula: React.FC<{ style?: React.CSSProperties }> = ({
   style,
 }) => (
-  <Img
-    src={staticFile("vintage/scrapbook.jpg")}
+  <AbsoluteFill
     style={{
-      position: "absolute",
-      inset: 0,
-      width: "100%",
-      height: "100%",
+      backgroundColor: colores.rosa,
+      backgroundImage: `linear-gradient(${colores.blanco}55 2px, transparent 2px), linear-gradient(90deg, ${colores.blanco}55 2px, transparent 2px)`,
+      backgroundSize: "90px 90px",
       ...style,
     }}
   />
@@ -302,39 +308,62 @@ export const Gancho: React.FC<{
   );
 };
 
-// Título del episodio, encima del scrapbook de cisnes
+// Título del episodio sobre fondo rosa cuadriculado, letras blancas
 export const TarjetaIntro: React.FC<{
   manuscrita: string;
   titulo: string;
   pastilla: string;
 }> = ({ manuscrita, titulo, pastilla }) => {
-  const { entrada, opacidad } = useEntradaSalida(6);
+  const a = useEntradaSalida(3);
+  const b = useEntradaSalida(12);
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 1180 }}>
-      <div
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 110 }}>
+      <Manuscrita
+        tamano={64}
+        color={colores.blanco}
+        style={{ opacity: a.opacidad }}
+      >
+        {manuscrita}
+      </Manuscrita>
+      <TextoVintage
+        tamano={140}
+        mayusculas
+        color={colores.blanco}
         style={{
-          opacity: opacidad,
-          transform: `translateY(${(1 - entrada) * 120}px) rotate(-2deg)`,
+          textShadow: `5px 5px 0 ${colores.oroRosa}`,
+          opacity: a.opacidad,
+          transform: `scale(${0.7 + a.entrada * 0.3})`,
         }}
       >
-        <BannerVintage ancho={820}>
-          <Manuscrita tamano={52}>{manuscrita}</Manuscrita>
-          <TextoVintage tamano={92} mayusculas>
-            {titulo}
-          </TextoVintage>
-          <TextoVintage tamano={36} style={{ marginTop: 6 }}>
-            {pastilla}
-          </TextoVintage>
-        </BannerVintage>
+        {titulo}
+      </TextoVintage>
+      <div
+        style={{
+          marginTop: 10,
+          marginLeft: 260,
+          opacity: b.opacidad,
+          transform: `scale(${b.entrada}) rotate(-4deg)`,
+          padding: "8px 22px 10px",
+          borderRadius: 999,
+          background: colores.oroRosa,
+          color: colores.blanco,
+          fontFamily: fuentes.texto,
+          fontWeight: 800,
+          fontSize: 34,
+          boxShadow: sombraSuave,
+        }}
+      >
+        {pastilla}
       </div>
-      <Destello x={150} y={1150} tamano={50} desfase={0} />
-      <Destello
-        derecha={150}
-        y={1420}
-        tamano={36}
-        color={colores.blanco}
-        desfase={12}
+      <Sticker
+        nombre="cisnes"
+        ancho={230}
+        x={40}
+        y={1600}
+        giro={-6}
+        retraso={10}
       />
+      <Destello derecha={110} y={470} tamano={50} color={colores.blanco} />
     </AbsoluteFill>
   );
 };
@@ -412,6 +441,7 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
       <AbsoluteFill style={{ alignItems: "center", paddingTop: 130 }}>
         <Manuscrita
           tamano={70}
+          vintage
           style={{
             textShadow: halo,
             opacity: a.opacidad,
@@ -512,7 +542,9 @@ export const Lista: React.FC<{
         giro={10}
         retraso={6}
       />
-      <Manuscrita tamano={66}>{titulo}</Manuscrita>
+      <Manuscrita tamano={66} vintage>
+        {titulo}
+      </Manuscrita>
       {puntos.map((p, i) => {
         const s = spring({
           frame: frame - p.enFrames,
@@ -551,7 +583,7 @@ export const Lista: React.FC<{
             >
               {i + 1}
             </span>
-            <TextoVintage tamano={42} style={{ whiteSpace: "nowrap" }}>
+            <TextoVintage tamano={50} style={{ whiteSpace: "nowrap" }}>
               {p.texto}
             </TextoVintage>
           </div>
@@ -583,9 +615,10 @@ export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
         <BannerVintage ancho={920}>
           <div
             style={{
-              fontFamily: fuentes.titulo,
-              fontSize: 72,
-              letterSpacing: 1,
+              fontFamily: fuentes.vintage,
+              fontWeight: 700,
+              fontStyle: "italic",
+              fontSize: 70,
               lineHeight: 1.05,
               color: colores.oroRosa,
             }}
@@ -638,9 +671,7 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
       }}
     >
       <BannerVintage ancho={430}>
-        <TextoVintage tamano={72} mayusculas>
-          {titulo}
-        </TextoVintage>
+        <TextoVintage tamano={64}>{titulo}</TextoVintage>
       </BannerVintage>
     </div>
   );
@@ -656,11 +687,15 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
           gap: 4,
         }}
       >
-        {tarjeta("LOW COST", entrada, -3)}
-        <Manuscrita tamano={80} style={{ opacity: alto, textShadow: halo }}>
+        {tarjeta("Low cost", entrada, -3)}
+        <Manuscrita
+          tamano={80}
+          vintage
+          style={{ opacity: alto, textShadow: halo }}
+        >
           vs
         </Manuscrita>
-        {tarjeta("HIGH COST", alto, 3)}
+        {tarjeta("High cost", alto, 3)}
         <Sticker
           nombre="copas"
           ancho={140}
@@ -721,20 +756,11 @@ export const Cierre: React.FC<{
         }}
       >
         <BannerVintage ancho={820}>
-          {/* Todo en un mismo párrafo */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: 14,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <TextoVintage tamano={56} mayusculas>
-              {`${titulo} ${destacado}`}
-            </TextoVintage>
-          </div>
-          <div style={{ position: "relative", marginTop: 10 }}>
+          <Manuscrita tamano={46}>{titulo}</Manuscrita>
+          <TextoVintage tamano={84} mayusculas>
+            {destacado}
+          </TextoVintage>
+          <div style={{ position: "relative", marginTop: 8 }}>
             {/* Onda del toque */}
             <div
               style={{

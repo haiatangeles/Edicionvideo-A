@@ -24,7 +24,7 @@ import {
   BarraProgreso,
   Cierre,
   Comparativa,
-  FondoScrapbook,
+  FondoCuadricula,
   Gancho,
   Lista,
   Pregunta,
@@ -38,26 +38,27 @@ export const BodaParis: React.FC = () => {
   const { fps } = useVideoConfig();
   const f = (seg: number) => Math.round(seg * fps);
 
-  // Durante la intro el vídeo se encoge dentro del arco del scrapbook de cisnes
+  // Durante la intro el vídeo se encoge dentro de una tarjeta, como en la referencia
   const tarjeta = interpolate(
     frame,
     [f(intro.desde), f(intro.desde) + 10, f(intro.hasta) - 10, f(intro.hasta)],
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
-  const escalaVideo = interpolate(tarjeta, [0, 1], [1, 0.55]);
+  const escalaVideo = interpolate(tarjeta, [0, 1], [1, 0.66]);
 
   return (
     <AbsoluteFill style={{ backgroundColor: colores.crema }}>
-      <FondoScrapbook style={{ opacity: tarjeta }} />
+      <FondoCuadricula style={{ opacity: tarjeta }} />
       <AbsoluteFill
         style={{
-          transform: `translateY(${tarjeta * 270}px) scale(${escalaVideo})`,
-          transformOrigin: "50% 0%",
-          // Forma de arco con filete dorado (medidas antes de escalar)
+          transform: `translateY(${tarjeta * 190}px) scale(${escalaVideo}) rotate(${tarjeta * -2}deg)`,
+          transformOrigin: "50% 38%",
           border:
-            tarjeta > 0 ? `${tarjeta * 12}px solid ${colores.oro}` : undefined,
-          borderRadius: `${tarjeta * 540}px ${tarjeta * 540}px ${tarjeta * 40}px ${tarjeta * 40}px`,
+            tarjeta > 0
+              ? `${tarjeta * 22}px solid ${colores.blanco}`
+              : undefined,
+          borderRadius: tarjeta * 40,
           overflow: "hidden",
           boxShadow:
             tarjeta > 0 ? "0 30px 60px rgba(120,90,70,0.35)" : undefined,
