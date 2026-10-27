@@ -60,7 +60,8 @@ export const BodaParis: React.FC = () => {
               : undefined,
           borderRadius: tarjeta * 40,
           overflow: "hidden",
-          boxShadow: tarjeta > 0 ? "0 30px 60px rgba(76,91,57,0.3)" : undefined,
+          boxShadow:
+            tarjeta > 0 ? "0 30px 60px rgba(190,120,130,0.35)" : undefined,
         }}
       >
         {/* Vídeo original, sin filtros ni zoom */}
@@ -102,7 +103,7 @@ export const BodaParis: React.FC = () => {
           from={f(t.desde)}
           durationInFrames={f(t.hasta - t.desde)}
         >
-          <TituloDidactico texto={t.texto} color={t.color} />
+          <TituloDidactico texto={t.texto} color={t.color} flor={t.flor} />
         </Sequence>
       ))}
       <Sequence

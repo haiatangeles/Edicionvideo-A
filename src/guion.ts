@@ -33,20 +33,35 @@ export const titulos: {
   hasta: number;
   texto: string;
   color: "rosa" | "salvia" | "claro";
+  flor: string;
 }[] = [
-  { desde: 12.3, hasta: 16.5, texto: "✨ una boda bonita", color: "claro" },
+  {
+    desde: 12.3,
+    hasta: 16.5,
+    texto: "✨ una boda bonita",
+    color: "claro",
+    flor: "orquidea-rosa",
+  },
   {
     desde: 16.7,
     hasta: 18.8,
     texto: "💸 sin gastar de más",
     color: "salvia",
+    flor: "azucena",
   },
-  { desde: 25, hasta: 31.5, texto: "👇 cómo voy a ahorrar", color: "rosa" },
+  {
+    desde: 25,
+    hasta: 31.5,
+    texto: "👇 cómo voy a ahorrar",
+    color: "rosa",
+    flor: "lirio-rosa",
+  },
   {
     desde: 32,
     hasta: 37,
     texto: "💗 gastar en lo importante",
     color: "salvia",
+    flor: "orquidea-verde",
   },
 ];
 
