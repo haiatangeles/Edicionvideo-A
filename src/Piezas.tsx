@@ -4,11 +4,11 @@ import {
   Img,
   interpolate,
   spring,
-  useCurrentFrame,
   staticFile,
+  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { colores, fuentes, sombraSuave } from "./estilo";
+import { colores, fuentes, halo, sombraSuave } from "./estilo";
 
 // Entrada con rebote y salida suave, relativa a la Sequence que lo contiene
 export const useEntradaSalida = (retrasoFrames = 0) => {
@@ -23,10 +23,7 @@ export const useEntradaSalida = (retrasoFrames = 0) => {
     frame,
     [durationInFrames - 8, durationInFrames],
     [1, 0],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    },
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
   return { entrada, salida, opacidad: Math.min(1, entrada * 1.5) * salida };
 };
@@ -39,7 +36,7 @@ export const Destello: React.FC<{
   tamano?: number;
   color?: string;
   desfase?: number;
-}> = ({ x, derecha, y, tamano = 44, color = colores.rosa, desfase = 0 }) => {
+}> = ({ x, derecha, y, tamano = 44, color = colores.oro, desfase = 0 }) => {
   const frame = useCurrentFrame();
   const s = 0.55 + 0.45 * Math.sin((frame + desfase) / 7);
   return (
@@ -64,8 +61,8 @@ export const Destello: React.FC<{
   );
 };
 
-// Flor recortada (public/flores) que aparece girando y luego se mece un poco
-export const Flor: React.FC<{
+// Sticker de boda (public/stickers) que aparece girando y luego se mece un poco
+export const Sticker: React.FC<{
   nombre: string;
   ancho: number;
   x?: number;
@@ -79,23 +76,124 @@ export const Flor: React.FC<{
   const mecer = Math.sin((frame + ancho) / 22) * 4;
   return (
     <Img
-      src={staticFile(`flores/${nombre}.png`)}
+      src={staticFile(`stickers/${nombre}.png`)}
       style={{
         position: "absolute",
         left: x,
         right: derecha,
         top: y,
-        width: ancho * 1.3,
+        width: ancho,
         opacity: Math.min(1, entrada * 1.5) * salida,
         transform: `scale(${entrada}) rotate(${giro + (1 - entrada) * -40 + mecer}deg)`,
-        filter: "drop-shadow(0 8px 14px rgba(120, 70, 80, 0.25))",
+        filter: "drop-shadow(0 8px 14px rgba(120, 90, 70, 0.3))",
         pointerEvents: "none",
       }}
     />
   );
 };
 
-// Subrayado que se dibuja de izquierda a derecha
+// Banner vintage: el marco dorado con rosas, siempre con su proporción original
+const PROPORCION_MARCO = 413 / 1076;
+
+export const BannerVintage: React.FC<{
+  children: React.ReactNode;
+  ancho: number;
+  style?: React.CSSProperties;
+}> = ({ children, ancho, style }) => (
+  <div
+    style={{
+      position: "relative",
+      width: ancho,
+      height: ancho * PROPORCION_MARCO,
+      padding: `0 ${ancho * 0.12}px`,
+      boxSizing: "border-box",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+      filter: "drop-shadow(0 10px 18px rgba(120, 90, 70, 0.3))",
+      ...style,
+    }}
+  >
+    <Img
+      src={staticFile("vintage/marco.png")}
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+    />
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      {children}
+    </div>
+  </div>
+);
+
+// Texto en serif vintage; el tamaño se ajusta para que quepa en el ancho dado
+export const TextoVintage: React.FC<{
+  children: string;
+  tamano: number;
+  anchoMax?: number;
+  cursiva?: boolean;
+  mayusculas?: boolean;
+  color?: string;
+  style?: React.CSSProperties;
+}> = ({
+  children,
+  tamano,
+  anchoMax,
+  cursiva = true,
+  mayusculas = false,
+  color = colores.oroRosa,
+  style,
+}) => {
+  const porLetra = mayusculas ? 0.68 : 0.46;
+  const ajustado = anchoMax
+    ? Math.min(tamano, anchoMax / (children.length * porLetra))
+    : tamano;
+  return (
+    <div
+      style={{
+        fontFamily: fuentes.titulo,
+        fontWeight: 700,
+        fontStyle: cursiva ? "italic" : "normal",
+        fontSize: ajustado,
+        lineHeight: 1.05,
+        letterSpacing: mayusculas ? 3 : 0.5,
+        textTransform: mayusculas ? "uppercase" : "none",
+        color,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+export const Manuscrita: React.FC<{
+  children: React.ReactNode;
+  tamano?: number;
+  color?: string;
+  style?: React.CSSProperties;
+}> = ({ children, tamano = 70, color = colores.oroRosa, style }) => (
+  <div
+    style={{
+      fontFamily: fuentes.manuscrita,
+      fontSize: tamano,
+      lineHeight: 1.2,
+      color,
+      ...style,
+    }}
+  >
+    {children}
+  </div>
+);
+
+// Filete dorado que se dibuja de izquierda a derecha
 const Subrayado: React.FC<{ progreso: number; ancho: number }> = ({
   progreso,
   ancho,
@@ -104,14 +202,14 @@ const Subrayado: React.FC<{ progreso: number; ancho: number }> = ({
   return (
     <svg
       width={ancho}
-      height={40}
-      style={{ display: "block", margin: "-6px auto 0" }}
+      height={34}
+      style={{ display: "block", margin: "0 auto" }}
     >
       <path
-        d={`M10 26 Q ${ancho / 2} 6 ${ancho - 10} 22`}
+        d={`M10 20 Q ${ancho / 2} 6 ${ancho - 10} 18`}
         fill="none"
-        stroke={colores.rosa}
-        strokeWidth={12}
+        stroke={colores.oro}
+        strokeWidth={5}
         strokeLinecap="round"
         strokeDasharray={largo}
         strokeDashoffset={largo * (1 - progreso)}
@@ -120,89 +218,19 @@ const Subrayado: React.FC<{ progreso: number; ancho: number }> = ({
   );
 };
 
-export const FondoCuadricula: React.FC<{ style?: React.CSSProperties }> = ({
+export const FondoScrapbook: React.FC<{ style?: React.CSSProperties }> = ({
   style,
 }) => (
-  <AbsoluteFill
+  <Img
+    src={staticFile("vintage/scrapbook.jpg")}
     style={{
-      backgroundColor: colores.rosaClaro,
-      backgroundImage: `linear-gradient(${colores.rosa}66 2px, transparent 2px), linear-gradient(90deg, ${colores.rosa}66 2px, transparent 2px)`,
-      backgroundSize: "90px 90px",
+      position: "absolute",
+      inset: 0,
+      width: "100%",
+      height: "100%",
       ...style,
     }}
   />
-);
-
-export const Pastilla: React.FC<{
-  children: React.ReactNode;
-  fondo?: string;
-  color?: string;
-  tamano?: number;
-  style?: React.CSSProperties;
-}> = ({
-  children,
-  fondo = colores.rosa,
-  color = colores.blanco,
-  tamano = 40,
-  style,
-}) => (
-  <span
-    style={{
-      display: "inline-block",
-      background: fondo,
-      color,
-      fontFamily: fuentes.texto,
-      fontWeight: 800,
-      fontSize: tamano,
-      padding: `${tamano * 0.25}px ${tamano * 0.6}px`,
-      borderRadius: 999,
-      boxShadow: sombraSuave,
-      whiteSpace: "nowrap",
-      ...style,
-    }}
-  >
-    {children}
-  </span>
-);
-
-export const TituloGrande: React.FC<{
-  children: React.ReactNode;
-  tamano?: number;
-  color?: string;
-  style?: React.CSSProperties;
-}> = ({ children, tamano = 150, color = colores.rosa, style }) => (
-  <div
-    style={{
-      fontFamily: fuentes.titulo,
-      fontSize: tamano,
-      color,
-      lineHeight: 1,
-      letterSpacing: 2,
-      textShadow: `4px 4px 0 ${colores.blanco}`,
-      ...style,
-    }}
-  >
-    {children}
-  </div>
-);
-
-export const Manuscrita: React.FC<{
-  children: React.ReactNode;
-  tamano?: number;
-  style?: React.CSSProperties;
-}> = ({ children, tamano = 70, style }) => (
-  <div
-    style={{
-      fontFamily: fuentes.manuscrita,
-      fontWeight: 700,
-      fontSize: tamano,
-      color: colores.rosa,
-      textShadow: `0 0 12px ${colores.blanco}, 0 0 5px ${colores.blanco}, 0 0 2px ${colores.blanco}`,
-      ...style,
-    }}
-  >
-    {children}
-  </div>
 );
 
 export const Gancho: React.FC<{
@@ -219,52 +247,56 @@ export const Gancho: React.FC<{
     extrapolateRight: "clamp",
   });
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 100 }}>
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 110 }}>
       <Manuscrita
+        tamano={84}
         style={{
+          textShadow: halo,
           opacity: a.opacidad,
           transform: `translateY(${(1 - a.entrada) * 40}px) rotate(-4deg)`,
-          marginBottom: 24,
         }}
       >
         {antes}
       </Manuscrita>
-      <TituloGrande
-        tamano={165}
+      <TextoVintage
+        tamano={132}
+        cursiva={false}
+        mayusculas
         style={{
+          textShadow: halo,
           opacity: b.opacidad,
           transform: `scale(${0.6 + b.entrada * 0.4})`,
         }}
       >
         {titulo}
-      </TituloGrande>
+      </TextoVintage>
       <div style={{ opacity: b.salida }}>
-        <Subrayado progreso={raya} ancho={760} />
+        <Subrayado progreso={raya} ancho={720} />
       </div>
       <div
         style={{
-          marginTop: 10,
+          marginTop: 6,
           opacity: c.opacidad,
           transform: `scale(${c.entrada}) rotate(-3deg)`,
         }}
       >
-        <Pastilla fondo={colores.rosa} color={colores.blanco} tamano={58}>
-          {pastilla}
-        </Pastilla>
+        <BannerVintage ancho={440}>
+          <TextoVintage tamano={60}>{pastilla}</TextoVintage>
+        </BannerVintage>
       </div>
-      <Flor
-        nombre="lirio-tallo"
-        ancho={160}
-        derecha={-10}
-        y={-20}
+      <Sticker
+        nombre="tacones"
+        ancho={180}
+        derecha={30}
+        y={40}
         giro={12}
         retraso={10}
       />
-      <Flor
-        nombre="azucena"
-        ancho={150}
+      <Sticker
+        nombre="corazon"
+        ancho={130}
         x={70}
-        y={430}
+        y={470}
         giro={-10}
         retraso={16}
       />
@@ -272,60 +304,38 @@ export const Gancho: React.FC<{
   );
 };
 
+// Título del episodio, encima del scrapbook de cisnes
 export const TarjetaIntro: React.FC<{
   manuscrita: string;
   titulo: string;
   pastilla: string;
 }> = ({ manuscrita, titulo, pastilla }) => {
-  const a = useEntradaSalida(3);
-  const b = useEntradaSalida(12);
+  const { entrada, opacidad } = useEntradaSalida(6);
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 110 }}>
-      <Manuscrita tamano={64} style={{ opacity: a.opacidad }}>
-        {manuscrita}
-      </Manuscrita>
-      <TituloGrande
-        tamano={140}
-        style={{
-          opacity: a.opacidad,
-          transform: `scale(${0.7 + a.entrada * 0.3})`,
-        }}
-      >
-        {titulo}
-      </TituloGrande>
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 1180 }}>
       <div
         style={{
-          marginTop: 6,
-          marginLeft: 260,
-          opacity: b.opacidad,
-          transform: `scale(${b.entrada}) rotate(-4deg)`,
+          opacity: opacidad,
+          transform: `translateY(${(1 - entrada) * 120}px) rotate(-2deg)`,
         }}
       >
-        <Pastilla tamano={34}>{pastilla}</Pastilla>
+        <BannerVintage ancho={820}>
+          <Manuscrita tamano={52}>{manuscrita}</Manuscrita>
+          <TextoVintage tamano={92} cursiva={false} mayusculas>
+            {titulo}
+          </TextoVintage>
+          <TextoVintage tamano={36} style={{ marginTop: 6 }}>
+            {pastilla}
+          </TextoVintage>
+        </BannerVintage>
       </div>
-      <Flor
-        nombre="lirio-rosa"
-        ancho={250}
-        derecha={40}
-        y={560}
-        giro={14}
-        retraso={8}
-      />
-      <Flor
-        nombre="orquidea-verde"
-        ancho={290}
-        x={20}
-        y={1450}
-        giro={-12}
-        retraso={12}
-      />
-      <Flor
-        nombre="mariposa"
-        ancho={140}
-        x={70}
-        y={540}
-        giro={-8}
-        retraso={16}
+      <Destello x={150} y={1150} tamano={50} desfase={0} />
+      <Destello
+        derecha={150}
+        y={1420}
+        tamano={36}
+        color={colores.blanco}
+        desfase={12}
       />
     </AbsoluteFill>
   );
@@ -335,15 +345,15 @@ const Avioncito: React.FC = () => (
   <svg viewBox="0 0 100 100" width={130} height={130}>
     <path
       d="M50 5 C54 5 56 10 56 16 L56 38 L92 58 L92 66 L56 55 L56 78 L68 87 L68 93 L50 88 L32 93 L32 87 L44 78 L44 55 L8 66 L8 58 L44 38 L44 16 C44 10 46 5 50 5Z"
-      fill={colores.rosaClaro}
-      stroke={colores.rosa}
+      fill={colores.crema}
+      stroke={colores.oro}
       strokeWidth={4}
       strokeLinejoin="round"
     />
   </svg>
 );
 
-// Título de viajes + avión que cruza por arriba dejando una estela de puntitos
+// Gancho de viajes + avión que cruza por arriba dejando una estela de puntitos
 export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
   antes,
   titulo,
@@ -358,7 +368,7 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
   });
   const ruta = (q: number) => ({
     x: -150 + q * 1380,
-    y: 560 - Math.sin(q * Math.PI) * 200 - q * 60,
+    y: 600 - Math.sin(q * Math.PI) * 180 - q * 60,
   });
   const pos = ruta(p);
   const delante = ruta(Math.min(1, p + 0.01));
@@ -383,8 +393,8 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
             cx={d.x}
             cy={d.y}
             r={7}
-            fill={colores.rosaClaro}
-            stroke={colores.rosa}
+            fill={colores.crema}
+            stroke={colores.oro}
             strokeWidth={3}
           />
         ))}
@@ -401,18 +411,13 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
           <Avioncito />
         </div>
       ) : null}
-      <AbsoluteFill style={{ alignItems: "center", paddingTop: 150 }}>
+      <AbsoluteFill style={{ alignItems: "center", paddingTop: 130 }}>
         <Manuscrita
-          tamano={62}
+          tamano={70}
           style={{
+            textShadow: halo,
             opacity: a.opacidad,
             transform: `translateY(${(1 - a.entrada) * 30}px) rotate(-3deg)`,
-            background: colores.rosaClaro,
-            color: colores.rosa,
-            textShadow: "none",
-            padding: "0 30px 6px",
-            borderRadius: 999,
-            boxShadow: sombraSuave,
           }}
         >
           {antes}
@@ -420,21 +425,19 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
         <div
           style={{
             position: "relative",
-            marginTop: 6,
             opacity: b.opacidad,
             transform: `scale(${b.entrada}) rotate(-3deg) translateY(${flotar}px)`,
           }}
         >
-          <Pastilla fondo={colores.rosa} color={colores.blanco} tamano={84}>
-            {titulo}
-          </Pastilla>
-          <Destello derecha={-20} y={-26} tamano={50} color={colores.salvia} />
-          <Flor
-            nombre="mariposa"
-            ancho={130}
-            derecha={-150}
-            y={-40}
-            giro={10}
+          <BannerVintage ancho={520}>
+            <TextoVintage tamano={96}>{titulo}</TextoVintage>
+          </BannerVintage>
+          <Sticker
+            nombre="auto"
+            ancho={220}
+            derecha={-190}
+            y={150}
+            giro={-4}
             retraso={2}
           />
         </div>
@@ -443,22 +446,15 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
   );
 };
 
-const fondoPorColor = {
-  rosa: { fondo: colores.rosa, texto: colores.blanco },
-  salvia: { fondo: colores.salvia, texto: colores.blanco },
-  claro: { fondo: colores.rosaClaro, texto: colores.rosa },
-};
-
-export const TituloDidactico: React.FC<{
-  texto: string;
-  color: keyof typeof fondoPorColor;
-  flor: string;
-}> = ({ texto, color, flor }) => {
+export const TituloDidactico: React.FC<{ texto: string; sticker: string }> = ({
+  texto,
+  sticker,
+}) => {
   const frame = useCurrentFrame();
   const { entrada, opacidad } = useEntradaSalida(0);
   const flotar = Math.sin(frame / 14) * 5;
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 170 }}>
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 130 }}>
       <div
         style={{
           position: "relative",
@@ -466,29 +462,20 @@ export const TituloDidactico: React.FC<{
           transform: `translateY(${(1 - entrada) * -60 + flotar}px) rotate(-2deg)`,
         }}
       >
-        <Pastilla
-          fondo={fondoPorColor[color].fondo}
-          color={fondoPorColor[color].texto}
-          tamano={62}
-        >
-          {texto}
-        </Pastilla>
-        <Flor
-          nombre={flor}
-          ancho={150}
-          x={-120}
+        <BannerVintage ancho={720}>
+          <TextoVintage tamano={68} anchoMax={720 * 0.7}>
+            {texto}
+          </TextoVintage>
+        </BannerVintage>
+        <Sticker
+          nombre={sticker}
+          ancho={170}
+          x={-110}
           y={-50}
           giro={-12}
           retraso={3}
         />
-        <Destello derecha={-26} y={-30} tamano={52} />
-        <Destello
-          derecha={-6}
-          y={46}
-          tamano={30}
-          color={colores.salvia}
-          desfase={20}
-        />
+        <Destello derecha={-20} y={-20} tamano={48} />
       </div>
     </AbsoluteFill>
   );
@@ -508,26 +495,26 @@ export const Lista: React.FC<{
         right: 60,
         top: 150,
         width: 560,
-        padding: "34px 40px",
-        background: colores.blanco,
-        borderRadius: 36,
-        border: `5px solid ${colores.blanco}`,
+        padding: "26px 40px 34px",
+        background: colores.crema,
+        borderRadius: 18,
+        border: `3px solid ${colores.oro}`,
+        outline: `2px solid ${colores.oro}`,
+        outlineOffset: -14,
         boxShadow: sombraSuave,
         opacity: opacidad,
         transform: `translateX(${(1 - entrada) * 300}px) rotate(2deg)`,
       }}
     >
-      <Flor
-        nombre="hibisco"
+      <Sticker
+        nombre="arco"
         ancho={150}
-        derecha={-80}
+        derecha={-70}
         y={-90}
-        giro={14}
+        giro={10}
         retraso={6}
       />
-      <Manuscrita tamano={58} style={{ textShadow: "none" }}>
-        {titulo}
-      </Manuscrita>
+      <Manuscrita tamano={66}>{titulo}</Manuscrita>
       {puntos.map((p, i) => {
         const s = spring({
           frame: frame - p.enFrames,
@@ -541,32 +528,32 @@ export const Lista: React.FC<{
               display: "flex",
               alignItems: "center",
               gap: 18,
-              marginTop: 18,
+              marginTop: 14,
               opacity: s,
               transform: `translateX(${(1 - s) * 60}px)`,
-              fontFamily: fuentes.texto,
-              fontWeight: 800,
-              fontSize: 46,
-              color: colores.rosa,
             }}
           >
             <span
               style={{
-                width: 62,
-                height: 62,
+                width: 58,
+                height: 58,
                 borderRadius: 999,
                 background: colores.rosa,
+                border: `2px solid ${colores.oro}`,
                 color: colores.blanco,
+                fontFamily: fuentes.titulo,
+                fontWeight: 700,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 36,
+                fontSize: 40,
+                lineHeight: 1,
                 flexShrink: 0,
               }}
             >
               {i + 1}
             </span>
-            {p.texto}
+            <TextoVintage tamano={50}>{p.texto}</TextoVintage>
           </div>
         );
       })}
@@ -585,40 +572,48 @@ export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
   );
   const cursor = letras < texto.length || Math.floor(frame / 15) % 2 === 0;
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 150 }}>
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 110 }}>
       <div
         style={{
           position: "relative",
-          width: 900,
-          textAlign: "center",
-          padding: "30px 40px",
-          background: colores.rosa,
-          border: `5px solid ${colores.blanco}`,
-          borderRadius: 40,
-          boxShadow: sombraSuave,
           opacity: opacidad,
           transform: `scale(${0.7 + entrada * 0.3})`,
         }}
       >
-        <TituloGrande
-          tamano={84}
-          color={colores.blanco}
-          style={{ textShadow: "none" }}
-        >
-          {texto.slice(0, letras)}
-          {/* El resto ocupa su sitio sin verse, así la tarjeta no cambia de tamaño */}
-          <span style={{ opacity: cursor ? 1 : 0, color: colores.rosaClaro }}>
-            |
-          </span>
-          <span style={{ opacity: 0 }}>{texto.slice(letras)}</span>
-        </TituloGrande>
-        <Flor
-          nombre="lirio-grande"
-          ancho={230}
-          derecha={-90}
-          y={-110}
-          giro={10}
+        <BannerVintage ancho={920}>
+          <div
+            style={{
+              fontFamily: fuentes.titulo,
+              fontWeight: 700,
+              fontStyle: "italic",
+              fontSize: 70,
+              lineHeight: 1.05,
+              color: colores.oroRosa,
+            }}
+          >
+            {texto.slice(0, letras)}
+            <span style={{ opacity: cursor ? 1 : 0, color: colores.oro }}>
+              |
+            </span>
+            {/* El resto ocupa su sitio sin verse, así el texto no salta */}
+            <span style={{ opacity: 0 }}>{texto.slice(letras)}</span>
+          </div>
+        </BannerVintage>
+        <Sticker
+          nombre="novia"
+          ancho={130}
+          x={-60}
+          y={160}
+          giro={-8}
           retraso={8}
+        />
+        <Sticker
+          nombre="traje"
+          ancho={130}
+          derecha={-60}
+          y={160}
+          giro={8}
+          retraso={12}
         />
       </div>
     </AbsoluteFill>
@@ -636,56 +631,43 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
     fps,
     config: { damping: 11 },
   });
-  const tarjeta = (
-    titulo: string,
-    fondo: string,
-    letra: string,
-    s: number,
-    giro: number,
-  ) => (
+  const tarjeta = (titulo: string, s: number, giro: number) => (
     <div
       style={{
-        width: 400,
-        padding: "26px 0",
-        textAlign: "center",
-        background: fondo,
-        borderRadius: 32,
-        border: `5px solid ${colores.blanco}`,
-        boxShadow: sombraSuave,
         transform: `scale(${s}) rotate(${giro}deg)`,
         opacity: Math.min(1, s * 1.5),
       }}
     >
-      <TituloGrande tamano={92} color={letra} style={{ textShadow: "none" }}>
-        {titulo}
-      </TituloGrande>
+      <BannerVintage ancho={430}>
+        <TextoVintage tamano={64}>{titulo}</TextoVintage>
+      </BannerVintage>
     </div>
   );
   return (
     <AbsoluteFill
-      style={{ paddingTop: 180, alignItems: "center", opacity: opacidad }}
+      style={{ paddingTop: 170, alignItems: "center", opacity: opacidad }}
     >
       <div
         style={{
           position: "relative",
           display: "flex",
           alignItems: "center",
-          gap: 24,
+          gap: 4,
         }}
       >
-        <Flor
-          nombre="orquidea-rosa"
-          ancho={170}
-          x={-70}
-          y={-80}
-          giro={-12}
-          retraso={4}
-        />
-        {tarjeta("LOW COST", colores.salvia, colores.blanco, entrada, -3)}
-        <Manuscrita tamano={70} style={{ opacity: alto }}>
+        {tarjeta("Low cost", entrada, -3)}
+        <Manuscrita tamano={80} style={{ opacity: alto, textShadow: halo }}>
           vs
         </Manuscrita>
-        {tarjeta("HIGH COST", colores.rosa, colores.blanco, alto, 3)}
+        {tarjeta("High cost", alto, 3)}
+        <Sticker
+          nombre="copas"
+          ancho={140}
+          x={380}
+          y={130}
+          giro={-6}
+          retraso={4}
+        />
       </div>
     </AbsoluteFill>
   );
@@ -696,7 +678,7 @@ const Dedo: React.FC = () => (
     <path
       d="M24 6c3 0 5 2 5 5v17l3-1c3-1 6 1 6 4v1l3-1c3-1 6 1 6 4v1l2-1c3 0 6 2 6 5v10c0 9-7 15-16 15h-6c-5 0-9-3-11-7L9 39c-2-3 0-7 4-7 2 0 3 1 5 3l1 2V11c0-3 2-5 5-5Z"
       fill={colores.blanco}
-      stroke={colores.rosa}
+      stroke={colores.oroRosa}
       strokeWidth={3}
       strokeLinejoin="round"
     />
@@ -719,10 +701,7 @@ export const Cierre: React.FC<{
     frame,
     [toque - 3, toque, toque + 5],
     [1, 0.9, 1],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    },
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
   const onda = interpolate(frame, [toque, toque + 18], [0, 1], {
     extrapolateLeft: "clamp",
@@ -733,76 +712,87 @@ export const Cierre: React.FC<{
     extrapolateRight: "clamp",
   });
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 90 }}>
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 50 }}>
       <div
         style={{
           position: "relative",
-          display: "flex",
-          alignItems: "center",
-          gap: 20,
-          padding: "14px 18px 14px 34px",
-          background: colores.rosaClaro,
-          borderRadius: 999,
-          border: `4px solid ${colores.blanco}`,
-          boxShadow: sombraSuave,
-          transform: `translateY(${(1 - entrada) * -160}px)`,
-          whiteSpace: "nowrap",
+          transform: `translateY(${(1 - entrada) * -200}px)`,
         }}
       >
-        <Manuscrita tamano={46} style={{ textShadow: "none" }}>
-          {titulo}
-        </Manuscrita>
-        <TituloGrande tamano={56} style={{ textShadow: "none" }}>
-          {destacado}
-        </TituloGrande>
-        <div style={{ position: "relative" }}>
-          {/* Onda del toque */}
+        <BannerVintage ancho={820}>
+          {/* Todo en un mismo párrafo */}
           <div
             style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: 999,
-              border: `5px solid ${colores.rosa}`,
-              transform: `scale(${1 + onda * 0.35})`,
-              opacity: onda > 0 ? 1 - onda : 0,
-            }}
-          />
-          <Pastilla
-            fondo={pulsado ? colores.blanco : colores.rosa}
-            color={pulsado ? colores.rosa : colores.blanco}
-            tamano={34}
-            style={{ transform: `scale(${presion})`, boxShadow: "none" }}
-          >
-            {pulsado ? botonPulsado : boton}
-          </Pastilla>
-          <div
-            style={{
-              position: "absolute",
-              left: "45%",
-              top: 26,
-              transform: `translate(${(1 - llegada) * 220 + salidaDedo * 160}px, ${(1 - llegada) * 200 + salidaDedo * 140}px) scale(${pulsado && frame < toque + 5 ? 0.9 : 1})`,
-              opacity: 1 - salidaDedo,
+              display: "flex",
+              alignItems: "baseline",
+              gap: 14,
+              whiteSpace: "nowrap",
             }}
           >
-            <Dedo />
+            <Manuscrita tamano={42} style={{ marginRight: 8 }}>
+              {titulo}
+            </Manuscrita>
+            <TextoVintage tamano={48} cursiva={false} mayusculas>
+              {destacado}
+            </TextoVintage>
           </div>
-        </div>
-        <Flor
-          nombre="lirio-tallo"
+          <div style={{ position: "relative", marginTop: 10 }}>
+            {/* Onda del toque */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: 999,
+                border: `4px solid ${colores.oro}`,
+                transform: `scale(${1 + onda * 0.35})`,
+                opacity: onda > 0 ? 1 - onda : 0,
+              }}
+            />
+            <div
+              style={{
+                padding: "6px 30px 8px",
+                borderRadius: 999,
+                border: `2px solid ${colores.oro}`,
+                background: pulsado ? colores.crema : colores.rosa,
+                color: pulsado ? colores.oroRosa : colores.blanco,
+                fontFamily: fuentes.titulo,
+                fontWeight: 700,
+                fontStyle: "italic",
+                fontSize: 34,
+                transform: `scale(${presion})`,
+              }}
+            >
+              {pulsado ? botonPulsado : boton}
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                left: "45%",
+                top: 22,
+                transform: `translate(${(1 - llegada) * 220 + salidaDedo * 160}px, ${(1 - llegada) * 200 + salidaDedo * 140}px) scale(${pulsado && frame < toque + 5 ? 0.9 : 1})`,
+                opacity: 1 - salidaDedo,
+              }}
+            >
+              <Dedo />
+            </div>
+          </div>
+        </BannerVintage>
+        <Sticker
+          nombre="corazon"
           ancho={110}
-          x={-150}
-          y={-60}
-          giro={-14}
+          x={-40}
+          y={200}
+          giro={-12}
           retraso={6}
         />
         {pulsado ? (
           <>
-            <Destello derecha={60} y={-22} tamano={44} />
+            <Destello derecha={40} y={10} tamano={44} />
             <Destello
-              derecha={-12}
-              y={-18}
+              x={90}
+              y={240}
               tamano={30}
-              color={colores.salvia}
+              color={colores.rosa}
               desfase={15}
             />
           </>
@@ -822,7 +812,7 @@ export const BarraProgreso: React.FC = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        height: 16,
+        height: 14,
         background: "rgba(255,255,255,0.5)",
       }}
     >
@@ -830,7 +820,7 @@ export const BarraProgreso: React.FC = () => {
         style={{
           height: "100%",
           width: `${(frame / (durationInFrames - 1)) * 100}%`,
-          background: `linear-gradient(90deg, ${colores.rosa}, ${colores.salvia})`,
+          background: `linear-gradient(90deg, ${colores.rosa}, ${colores.oro})`,
         }}
       />
     </div>

@@ -1,21 +1,21 @@
-import "@fontsource/anton/400.css";
-import "@fontsource/dancing-script/700.css";
-import "@fontsource/poppins/600.css";
-import "@fontsource/poppins/800.css";
+import "@fontsource/cormorant-garamond/700.css";
+import "@fontsource/cormorant-garamond/700-italic.css";
+import "@fontsource/pinyon-script/400.css";
 
-// Paleta "Colour Palette" con el verde cambiado por rosa #E7B2B9
+// Paleta vintage: rosas de la Colour Palette + oro del marco
 export const colores = {
   rosaClaro: "#FDE7EA",
   rosa: "#E7B2B9",
-  piedra: "#E1D9D3",
-  salvia: "#CCC9A4",
+  oroRosa: "#B76E79", // texto sobre el marco crema
+  oro: "#C2A26B",
+  crema: "#FBF5EA",
   blanco: "#FFFFFF",
 };
 
 export const fuentes = {
-  titulo: "Anton, Impact, sans-serif",
-  manuscrita: "'Dancing Script', cursive",
-  texto: "Poppins, Helvetica, sans-serif",
+  titulo: "'Cormorant Garamond', Georgia, serif",
+  manuscrita: "'Pinyon Script', cursive",
 };
 
-export const sombraSuave = "0 10px 30px rgba(190, 120, 130, 0.3)";
+export const sombraSuave = "0 10px 30px rgba(150, 110, 90, 0.28)";
+export const halo = `0 0 14px ${colores.blanco}, 0 0 6px ${colores.blanco}, 0 0 2px ${colores.blanco}`;

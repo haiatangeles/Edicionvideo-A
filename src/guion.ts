@@ -8,7 +8,7 @@ export const gancho = {
   hasta: 2.8,
   antes: "planeando mi",
   titulo: "BODA EN PARÍS",
-  pastilla: "¿low cost? 💸",
+  pastilla: "¿low cost?",
 };
 
 export const intro = {
@@ -24,7 +24,7 @@ export const viajes = {
   desde: 18.9,
   hasta: 20.2,
   antes: "prefiero gastarlo en",
-  titulo: "viajes ✈️",
+  titulo: "viajes",
 };
 
 // Títulos didácticos arriba del todo
@@ -32,37 +32,12 @@ export const titulos: {
   desde: number;
   hasta: number;
   texto: string;
-  color: "rosa" | "salvia" | "claro";
-  flor: string;
+  sticker: string;
 }[] = [
-  {
-    desde: 12.3,
-    hasta: 16.5,
-    texto: "✨ una boda bonita",
-    color: "claro",
-    flor: "orquidea-rosa",
-  },
-  {
-    desde: 16.7,
-    hasta: 18.8,
-    texto: "💸 sin gastar de más",
-    color: "salvia",
-    flor: "azucena",
-  },
-  {
-    desde: 25,
-    hasta: 31.5,
-    texto: "👇 cómo voy a ahorrar",
-    color: "rosa",
-    flor: "lirio-rosa",
-  },
-  {
-    desde: 32,
-    hasta: 37,
-    texto: "💗 gastar en lo importante",
-    color: "salvia",
-    flor: "orquidea-verde",
-  },
+  { desde: 12.3, hasta: 16.5, texto: "una boda bonita", sticker: "vestido" },
+  { desde: 16.7, hasta: 18.8, texto: "sin gastar de más", sticker: "anillos" },
+  { desde: 25, hasta: 31.5, texto: "cómo voy a ahorrar", sticker: "pastel" },
+  { desde: 32, hasta: 37, texto: "gastar en lo importante", sticker: "rosas" },
 ];
 
 export const lista = {
