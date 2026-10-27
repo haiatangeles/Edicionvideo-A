@@ -61,7 +61,7 @@ export const comparativa = { desde: 49, hasta: 54, low: 49.3, high: 52.2 };
 
 export const cierre = {
   desde: 54,
-  titulo: "sígueme para el",
+  titulo: "SÍGUEME PARA EL",
   destacado: "EPISODIO 02",
   boton: "Seguir",
   botonPulsado: "Siguiendo ✓",

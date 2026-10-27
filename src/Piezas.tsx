@@ -133,12 +133,12 @@ export const BannerVintage: React.FC<{
   </div>
 );
 
-// Texto en serif vintage; el tamaño se ajusta para que quepa en el ancho dado
+// Títulos en Anton (mayúsculas) y textos en Poppins gruesa, como el borrador 11;
+// el tamaño se ajusta para que quepa en el ancho dado
 export const TextoVintage: React.FC<{
   children: string;
   tamano: number;
   anchoMax?: number;
-  cursiva?: boolean;
   mayusculas?: boolean;
   color?: string;
   style?: React.CSSProperties;
@@ -146,24 +146,22 @@ export const TextoVintage: React.FC<{
   children,
   tamano,
   anchoMax,
-  cursiva = true,
   mayusculas = false,
   color = colores.oroRosa,
   style,
 }) => {
-  const porLetra = mayusculas ? 0.68 : 0.46;
+  const porLetra = mayusculas ? 0.5 : 0.62;
   const ajustado = anchoMax
     ? Math.min(tamano, anchoMax / (children.length * porLetra))
     : tamano;
   return (
     <div
       style={{
-        fontFamily: fuentes.titulo,
-        fontWeight: 700,
-        fontStyle: cursiva ? "italic" : "normal",
+        fontFamily: mayusculas ? fuentes.titulo : fuentes.texto,
+        fontWeight: mayusculas ? 400 : 800,
         fontSize: ajustado,
         lineHeight: 1.05,
-        letterSpacing: mayusculas ? 3 : 0.5,
+        letterSpacing: mayusculas ? 2 : 0,
         textTransform: mayusculas ? "uppercase" : "none",
         color,
         ...style,
@@ -183,6 +181,7 @@ export const Manuscrita: React.FC<{
   <div
     style={{
       fontFamily: fuentes.manuscrita,
+      fontWeight: 700,
       fontSize: tamano,
       lineHeight: 1.2,
       color,
@@ -260,7 +259,6 @@ export const Gancho: React.FC<{
       </Manuscrita>
       <TextoVintage
         tamano={132}
-        cursiva={false}
         mayusculas
         style={{
           textShadow: halo,
@@ -321,7 +319,7 @@ export const TarjetaIntro: React.FC<{
       >
         <BannerVintage ancho={820}>
           <Manuscrita tamano={52}>{manuscrita}</Manuscrita>
-          <TextoVintage tamano={92} cursiva={false} mayusculas>
+          <TextoVintage tamano={92} mayusculas>
             {titulo}
           </TextoVintage>
           <TextoVintage tamano={36} style={{ marginTop: 6 }}>
@@ -541,19 +539,21 @@ export const Lista: React.FC<{
                 background: colores.rosa,
                 border: `2px solid ${colores.oro}`,
                 color: colores.blanco,
-                fontFamily: fuentes.titulo,
-                fontWeight: 700,
+                fontFamily: fuentes.texto,
+                fontWeight: 800,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 40,
+                fontSize: 32,
                 lineHeight: 1,
                 flexShrink: 0,
               }}
             >
               {i + 1}
             </span>
-            <TextoVintage tamano={50}>{p.texto}</TextoVintage>
+            <TextoVintage tamano={42} style={{ whiteSpace: "nowrap" }}>
+              {p.texto}
+            </TextoVintage>
           </div>
         );
       })}
@@ -584,9 +584,8 @@ export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
           <div
             style={{
               fontFamily: fuentes.titulo,
-              fontWeight: 700,
-              fontStyle: "italic",
-              fontSize: 70,
+              fontSize: 72,
+              letterSpacing: 1,
               lineHeight: 1.05,
               color: colores.oroRosa,
             }}
@@ -639,7 +638,9 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
       }}
     >
       <BannerVintage ancho={430}>
-        <TextoVintage tamano={64}>{titulo}</TextoVintage>
+        <TextoVintage tamano={72} mayusculas>
+          {titulo}
+        </TextoVintage>
       </BannerVintage>
     </div>
   );
@@ -655,11 +656,11 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
           gap: 4,
         }}
       >
-        {tarjeta("Low cost", entrada, -3)}
+        {tarjeta("LOW COST", entrada, -3)}
         <Manuscrita tamano={80} style={{ opacity: alto, textShadow: halo }}>
           vs
         </Manuscrita>
-        {tarjeta("High cost", alto, 3)}
+        {tarjeta("HIGH COST", alto, 3)}
         <Sticker
           nombre="copas"
           ancho={140}
@@ -729,11 +730,8 @@ export const Cierre: React.FC<{
               whiteSpace: "nowrap",
             }}
           >
-            <Manuscrita tamano={42} style={{ marginRight: 8 }}>
-              {titulo}
-            </Manuscrita>
-            <TextoVintage tamano={48} cursiva={false} mayusculas>
-              {destacado}
+            <TextoVintage tamano={56} mayusculas>
+              {`${titulo} ${destacado}`}
             </TextoVintage>
           </div>
           <div style={{ position: "relative", marginTop: 10 }}>
@@ -755,10 +753,9 @@ export const Cierre: React.FC<{
                 border: `2px solid ${colores.oro}`,
                 background: pulsado ? colores.crema : colores.rosa,
                 color: pulsado ? colores.oroRosa : colores.blanco,
-                fontFamily: fuentes.titulo,
-                fontWeight: 700,
-                fontStyle: "italic",
-                fontSize: 34,
+                fontFamily: fuentes.texto,
+                fontWeight: 800,
+                fontSize: 30,
                 transform: `scale(${presion})`,
               }}
             >
