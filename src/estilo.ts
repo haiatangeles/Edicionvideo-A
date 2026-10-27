@@ -1,6 +1,5 @@
-import "@fontsource/playfair-display/700.css";
-import "@fontsource/playfair-display/700-italic.css";
-import "@fontsource/great-vibes/400.css";
+import "@fontsource/anton/400.css";
+import "@fontsource/dancing-script/700.css";
 import "@fontsource/poppins/600.css";
 import "@fontsource/poppins/800.css";
 
@@ -14,10 +13,9 @@ export const colores = {
   blanco: "#FFFFFF",
 };
 
-// Formal + elegante (Playfair, con cursiva para el toque divertido) y caligráfica (Great Vibes)
 export const fuentes = {
-  titulo: "'Playfair Display', Georgia, serif",
-  manuscrita: "'Great Vibes', cursive",
+  titulo: "Anton, Impact, sans-serif",
+  manuscrita: "'Dancing Script', cursive",
   texto: "Poppins, Helvetica, sans-serif",
 };
 

@@ -7,7 +7,7 @@ export const DURACION_SEG = 56.4;
 export const gancho = {
   hasta: 2.8,
   antes: "planeando mi",
-  titulo: "BODA EN _PARÍS_", // lo que va entre _ sale en cursiva
+  titulo: "BODA EN PARÍS",
   pastilla: "¿low cost? 💸",
 };
 
@@ -15,7 +15,7 @@ export const intro = {
   desde: 2.8,
   hasta: 5.8,
   manuscrita: "bienvenida a",
-  titulo: "EPISODIO _01_",
+  titulo: "EPISODIO 01",
   pastilla: "de mi boda en París",
 };
 
@@ -72,7 +72,7 @@ export const comparativa = { desde: 49, hasta: 54, low: 49.3, high: 52.2 };
 export const cierre = {
   desde: 54,
   titulo: "sígueme para el",
-  destacado: "EPISODIO _02_",
+  destacado: "EPISODIO 02",
   boton: "Seguir",
   botonPulsado: "Siguiendo ✓",
 };

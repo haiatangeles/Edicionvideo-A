@@ -119,7 +119,7 @@ export const Pastilla: React.FC<{
       background: fondo,
       color,
       fontFamily: fuentes.texto,
-      fontWeight: 600,
+      fontWeight: 800,
       fontSize: tamano,
       padding: `${tamano * 0.25}px ${tamano * 0.6}px`,
       borderRadius: 999,
@@ -132,20 +132,6 @@ export const Pastilla: React.FC<{
   </span>
 );
 
-// "BODA EN _PARÍS_" -> PARÍS en cursiva
-const conCursiva = (texto: React.ReactNode) =>
-  typeof texto === "string"
-    ? texto.split("_").map((trozo, i) =>
-        i % 2 ? (
-          <span key={i} style={{ fontStyle: "italic", textTransform: "none" }}>
-            {trozo.charAt(0) + trozo.slice(1).toLowerCase()}
-          </span>
-        ) : (
-          trozo
-        ),
-      )
-    : texto;
-
 export const TituloGrande: React.FC<{
   children: React.ReactNode;
   tamano?: number;
@@ -157,14 +143,13 @@ export const TituloGrande: React.FC<{
       fontFamily: fuentes.titulo,
       fontSize: tamano,
       color,
-      fontWeight: 700,
-      lineHeight: 1.05,
-      letterSpacing: 1,
+      lineHeight: 1,
+      letterSpacing: 2,
       textShadow: `4px 4px 0 ${colores.rosaClaro}`,
       ...style,
     }}
   >
-    {conCursiva(children)}
+    {children}
   </div>
 );
 
@@ -176,9 +161,8 @@ export const Manuscrita: React.FC<{
   <div
     style={{
       fontFamily: fuentes.manuscrita,
-      fontWeight: 400,
-      fontSize: tamano * 1.15,
-      lineHeight: 1.1,
+      fontWeight: 700,
+      fontSize: tamano,
       color: colores.verde,
       textShadow: `0 0 12px ${colores.rosaClaro}, 0 0 5px ${colores.rosaClaro}`,
       ...style,
@@ -213,7 +197,7 @@ export const Gancho: React.FC<{
         {antes}
       </Manuscrita>
       <TituloGrande
-        tamano={140}
+        tamano={165}
         style={{
           opacity: b.opacidad,
           transform: `scale(${0.6 + b.entrada * 0.4})`,
@@ -463,7 +447,7 @@ export const Lista: React.FC<{
               opacity: s,
               transform: `translateX(${(1 - s) * 60}px)`,
               fontFamily: fuentes.texto,
-              fontWeight: 600,
+              fontWeight: 800,
               fontSize: 46,
               color: colores.verde,
             }}
@@ -518,7 +502,7 @@ export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
         }}
       >
         <TituloGrande
-          tamano={78}
+          tamano={84}
           color={colores.rosaClaro}
           style={{ textShadow: "none" }}
         >
@@ -565,7 +549,7 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
         opacity: Math.min(1, s * 1.5),
       }}
     >
-      <TituloGrande tamano={76} color={letra} style={{ textShadow: "none" }}>
+      <TituloGrande tamano={92} color={letra} style={{ textShadow: "none" }}>
         {titulo}
       </TituloGrande>
     </div>
@@ -575,11 +559,11 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
       style={{ paddingTop: 180, alignItems: "center", opacity: opacidad }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-        {tarjeta("LOW _cost_", colores.salvia, colores.verde, entrada, -3)}
+        {tarjeta("LOW COST", colores.salvia, colores.verde, entrada, -3)}
         <Manuscrita tamano={70} style={{ opacity: alto }}>
           vs
         </Manuscrita>
-        {tarjeta("HIGH _cost_", colores.rosa, colores.verde, alto, 3)}
+        {tarjeta("HIGH COST", colores.rosa, colores.verde, alto, 3)}
       </div>
     </AbsoluteFill>
   );
@@ -643,7 +627,7 @@ export const Cierre: React.FC<{
           whiteSpace: "nowrap",
         }}
       >
-        <Manuscrita tamano={50} style={{ textShadow: "none" }}>
+        <Manuscrita tamano={46} style={{ textShadow: "none" }}>
           {titulo}
         </Manuscrita>
         <TituloGrande tamano={56} style={{ textShadow: "none" }}>
