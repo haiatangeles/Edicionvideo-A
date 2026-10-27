@@ -19,14 +19,6 @@ export const intro = {
   pastilla: "de mi boda en París",
 };
 
-// "Quiero una boda tipo Vogue" (momento estimado: no hay subtítulos en esa parte)
-export const vogue = {
-  desde: 8.8,
-  hasta: 12.2,
-  antes: "una boda tipo",
-  titulo: "VOGUE",
-};
-
 // "...prefiero gastarlo en viajes": título + avión
 export const viajes = {
   desde: 19,

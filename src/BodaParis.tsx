@@ -19,19 +19,17 @@ import {
   titulos,
   viajes,
   VIDEO,
-  vogue,
 } from "./guion";
 import {
   BarraProgreso,
   Cierre,
   Comparativa,
-  FondoPuntos,
+  FondoCuadricula,
   Gancho,
   Lista,
   Pregunta,
   TarjetaIntro,
   TituloDidactico,
-  TituloVogue,
   Viajes,
 } from "./Piezas";
 
@@ -51,7 +49,7 @@ export const BodaParis: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colores.rosaClaro }}>
-      <FondoPuntos style={{ opacity: tarjeta }} />
+      <FondoCuadricula style={{ opacity: tarjeta }} />
       <AbsoluteFill
         style={{
           transform: `translateY(${tarjeta * 190}px) scale(${escalaVideo}) rotate(${tarjeta * -2}deg)`,
@@ -63,7 +61,7 @@ export const BodaParis: React.FC = () => {
           borderRadius: tarjeta * 40,
           overflow: "hidden",
           boxShadow:
-            tarjeta > 0 ? "0 30px 60px rgba(122,31,61,0.25)" : undefined,
+            tarjeta > 0 ? "0 30px 60px rgba(214,120,160,0.35)" : undefined,
         }}
       >
         {/* Vídeo original, sin filtros ni zoom */}
@@ -90,13 +88,6 @@ export const BodaParis: React.FC = () => {
           titulo={intro.titulo}
           pastilla={intro.pastilla}
         />
-      </Sequence>
-      <Sequence
-        name="Vogue"
-        from={f(vogue.desde)}
-        durationInFrames={f(vogue.hasta - vogue.desde)}
-      >
-        <TituloVogue antes={vogue.antes} titulo={vogue.titulo} />
       </Sequence>
       <Sequence
         name="Viajes"

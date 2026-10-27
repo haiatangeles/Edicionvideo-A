@@ -84,7 +84,7 @@ const Subrayado: React.FC<{ progreso: number; ancho: number }> = ({
       <path
         d={`M10 26 Q ${ancho / 2} 6 ${ancho - 10} 22`}
         fill="none"
-        stroke={colores.rosa}
+        stroke={colores.amarillo}
         strokeWidth={14}
         strokeLinecap="round"
         strokeDasharray={largo}
@@ -94,15 +94,14 @@ const Subrayado: React.FC<{ progreso: number; ancho: number }> = ({
   );
 };
 
-export const FondoPuntos: React.FC<{ style?: React.CSSProperties }> = ({
+export const FondoCuadricula: React.FC<{ style?: React.CSSProperties }> = ({
   style,
 }) => (
   <AbsoluteFill
     style={{
-      backgroundColor: colores.rosa,
-      backgroundImage: `radial-gradient(${colores.amarillo} 10px, transparent 11px), radial-gradient(${colores.beige} 7px, transparent 8px)`,
-      backgroundSize: "260px 300px, 190px 230px",
-      backgroundPosition: "40px 60px, 150px 170px",
+      backgroundColor: colores.blanco,
+      backgroundImage: `linear-gradient(${colores.cuadricula} 2px, transparent 2px), linear-gradient(90deg, ${colores.cuadricula} 2px, transparent 2px)`,
+      backgroundSize: "90px 90px",
       ...style,
     }}
   />
@@ -116,8 +115,8 @@ export const Pastilla: React.FC<{
   style?: React.CSSProperties;
 }> = ({
   children,
-  fondo = colores.granate,
-  color = colores.blanco,
+  fondo = colores.rosa,
+  color = colores.amarillo,
   tamano = 40,
   style,
 }) => (
@@ -143,16 +142,17 @@ export const Pastilla: React.FC<{
 export const TituloGrande: React.FC<{
   children: React.ReactNode;
   tamano?: number;
+  color?: string;
   style?: React.CSSProperties;
-}> = ({ children, tamano = 150, style }) => (
+}> = ({ children, tamano = 150, color = colores.rosa, style }) => (
   <div
     style={{
       fontFamily: fuentes.titulo,
       fontSize: tamano,
-      color: colores.granate,
+      color,
       lineHeight: 1,
       letterSpacing: 2,
-      textShadow: `5px 5px 0 ${colores.blanco}`,
+      textShadow: `5px 5px 0 ${colores.amarillo}`,
       ...style,
     }}
   >
@@ -170,7 +170,8 @@ export const Manuscrita: React.FC<{
       fontFamily: fuentes.manuscrita,
       fontWeight: 700,
       fontSize: tamano,
-      color: colores.granate,
+      color: colores.rosa,
+      textShadow: `0 0 10px ${colores.blanco}, 0 0 4px ${colores.blanco}`,
       ...style,
     }}
   >
@@ -221,7 +222,7 @@ export const Gancho: React.FC<{
           transform: `scale(${c.entrada}) rotate(-3deg)`,
         }}
       >
-        <Pastilla fondo={colores.amarillo} color={colores.granate} tamano={58}>
+        <Pastilla fondo={colores.amarillo} color={colores.rosa} tamano={58}>
           {pastilla}
         </Pastilla>
       </div>
@@ -264,118 +265,13 @@ export const TarjetaIntro: React.FC<{
   );
 };
 
-// Título tipo portada de revista: las letras caen una a una y se juntan
-export const TituloVogue: React.FC<{ antes: string; titulo: string }> = ({
-  antes,
-  titulo,
-}) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const { entrada, opacidad } = useEntradaSalida(0);
-  const lineas = interpolate(frame, [14, 34], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const juntar = interpolate(frame, [4, 40], [70, 14], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const flotar = Math.sin(frame / 16) * 4;
-  return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
-      <div
-        style={{
-          position: "relative",
-          textAlign: "center",
-          width: 760,
-          boxSizing: "border-box",
-          padding: "26px 40px 34px",
-          background: colores.rosa,
-          borderRadius: 40,
-          border: `6px solid ${colores.blanco}`,
-          boxShadow: sombraSuave,
-          opacity: opacidad,
-          transform: `translateY(${(1 - entrada) * -80 + flotar}px) scale(${0.85 + entrada * 0.15})`,
-        }}
-      >
-        <Manuscrita tamano={60}>{antes}</Manuscrita>
-        <div
-          style={{
-            height: 6,
-            background: colores.amarillo,
-            borderRadius: 3,
-            width: `${lineas * 100}%`,
-            margin: "8px auto 6px",
-          }}
-        />
-        <div
-          style={{
-            fontFamily: fuentes.revista,
-            fontWeight: 800,
-            fontSize: 150,
-            color: colores.granate,
-            letterSpacing: juntar,
-            marginRight: -juntar,
-            lineHeight: 1,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {titulo.split("").map((letra, i) => {
-            const s = spring({
-              frame: frame - 4 - i * 4,
-              fps,
-              config: { damping: 12 },
-            });
-            return (
-              <span
-                key={i}
-                style={{
-                  display: "inline-block",
-                  opacity: s,
-                  transform: `translateY(${(1 - s) * -60}px)`,
-                }}
-              >
-                {letra}
-              </span>
-            );
-          })}
-        </div>
-        <div
-          style={{
-            height: 6,
-            background: colores.amarillo,
-            borderRadius: 3,
-            width: `${lineas * 100}%`,
-            margin: "10px auto 0",
-          }}
-        />
-        <Destello x={-30} y={-30} tamano={64} desfase={0} />
-        <Destello
-          derecha={-22}
-          y={60}
-          tamano={44}
-          color={colores.blanco}
-          desfase={12}
-        />
-        <Destello
-          x={40}
-          y={190}
-          tamano={34}
-          color={colores.blanco}
-          desfase={25}
-        />
-      </div>
-    </AbsoluteFill>
-  );
-};
-
 const Avioncito: React.FC = () => (
   <svg viewBox="0 0 100 100" width={130} height={130}>
     <path
       d="M50 5 C54 5 56 10 56 16 L56 38 L92 58 L92 66 L56 55 L56 78 L68 87 L68 93 L50 88 L32 93 L32 87 L44 78 L44 55 L8 66 L8 58 L44 38 L44 16 C44 10 46 5 50 5Z"
       fill={colores.rosa}
-      stroke={colores.granate}
-      strokeWidth={3}
+      stroke={colores.blanco}
+      strokeWidth={4}
       strokeLinejoin="round"
     />
   </svg>
@@ -445,7 +341,9 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
           style={{
             opacity: a.opacidad,
             transform: `translateY(${(1 - a.entrada) * 30}px) rotate(-3deg)`,
-            background: colores.rosaClaro,
+            background: colores.rosa,
+            color: colores.amarillo,
+            textShadow: "none",
             padding: "0 30px 6px",
             borderRadius: 999,
             boxShadow: sombraSuave,
@@ -461,11 +359,7 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
             transform: `scale(${b.entrada}) rotate(-3deg) translateY(${flotar}px)`,
           }}
         >
-          <Pastilla
-            fondo={colores.amarillo}
-            color={colores.granate}
-            tamano={84}
-          >
+          <Pastilla fondo={colores.amarillo} color={colores.rosa} tamano={84}>
             {titulo}
           </Pastilla>
           <Destello derecha={-20} y={-26} tamano={50} color={colores.rosa} />
@@ -476,9 +370,9 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
 };
 
 const fondoPorColor = {
-  rosa: colores.rosa,
-  amarillo: colores.amarillo,
-  blanco: colores.blanco,
+  rosa: { fondo: colores.rosa, texto: colores.amarillo },
+  amarillo: { fondo: colores.amarillo, texto: colores.rosa },
+  blanco: { fondo: colores.blanco, texto: colores.rosa },
 };
 
 export const TituloDidactico: React.FC<{
@@ -498,8 +392,8 @@ export const TituloDidactico: React.FC<{
         }}
       >
         <Pastilla
-          fondo={fondoPorColor[color]}
-          color={colores.granate}
+          fondo={fondoPorColor[color].fondo}
+          color={fondoPorColor[color].texto}
           tamano={62}
         >
           {texto}
@@ -532,7 +426,7 @@ export const Lista: React.FC<{
         top: 150,
         width: 560,
         padding: "34px 40px",
-        background: colores.beige,
+        background: colores.amarillo,
         borderRadius: 36,
         border: `5px solid ${colores.blanco}`,
         boxShadow: sombraSuave,
@@ -540,7 +434,9 @@ export const Lista: React.FC<{
         transform: `translateX(${(1 - entrada) * 300}px) rotate(2deg)`,
       }}
     >
-      <Manuscrita tamano={58}>{titulo}</Manuscrita>
+      <Manuscrita tamano={58} style={{ textShadow: "none" }}>
+        {titulo}
+      </Manuscrita>
       {puntos.map((p, i) => {
         const s = spring({
           frame: frame - p.enFrames,
@@ -560,7 +456,7 @@ export const Lista: React.FC<{
               fontFamily: fuentes.texto,
               fontWeight: 800,
               fontSize: 46,
-              color: colores.granate,
+              color: colores.rosa,
             }}
           >
             <span
@@ -569,7 +465,7 @@ export const Lista: React.FC<{
                 height: 62,
                 borderRadius: 999,
                 background: colores.rosa,
-                color: colores.blanco,
+                color: colores.amarillo,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -604,17 +500,22 @@ export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
           width: 900,
           textAlign: "center",
           padding: "30px 40px",
-          background: colores.blanco,
+          background: colores.rosa,
+          border: `5px solid ${colores.blanco}`,
           borderRadius: 40,
           boxShadow: sombraSuave,
           opacity: opacidad,
           transform: `scale(${0.7 + entrada * 0.3})`,
         }}
       >
-        <TituloGrande tamano={84} style={{ textShadow: "none" }}>
+        <TituloGrande
+          tamano={84}
+          color={colores.amarillo}
+          style={{ textShadow: "none" }}
+        >
           {texto.slice(0, letras)}
           {/* El resto ocupa su sitio sin verse, así la tarjeta no cambia de tamaño */}
-          <span style={{ opacity: cursor ? 1 : 0, color: colores.rosa }}>
+          <span style={{ opacity: cursor ? 1 : 0, color: colores.blanco }}>
             |
           </span>
           <span style={{ opacity: 0 }}>{texto.slice(letras)}</span>
@@ -635,7 +536,13 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
     fps,
     config: { damping: 11 },
   });
-  const tarjeta = (titulo: string, fondo: string, s: number, giro: number) => (
+  const tarjeta = (
+    titulo: string,
+    fondo: string,
+    letra: string,
+    s: number,
+    giro: number,
+  ) => (
     <div
       style={{
         width: 400,
@@ -649,7 +556,7 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
         opacity: Math.min(1, s * 1.5),
       }}
     >
-      <TituloGrande tamano={92} style={{ textShadow: "none" }}>
+      <TituloGrande tamano={92} color={letra} style={{ textShadow: "none" }}>
         {titulo}
       </TituloGrande>
     </div>
@@ -659,11 +566,11 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
       style={{ paddingTop: 180, alignItems: "center", opacity: opacidad }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-        {tarjeta("LOW COST", colores.amarillo, entrada, -3)}
+        {tarjeta("LOW COST", colores.amarillo, colores.rosa, entrada, -3)}
         <Manuscrita tamano={70} style={{ opacity: alto }}>
           vs
         </Manuscrita>
-        {tarjeta("HIGH COST", colores.rosa, alto, 3)}
+        {tarjeta("HIGH COST", colores.rosa, colores.amarillo, alto, 3)}
       </div>
     </AbsoluteFill>
   );
@@ -674,7 +581,7 @@ const Dedo: React.FC = () => (
     <path
       d="M24 6c3 0 5 2 5 5v17l3-1c3-1 6 1 6 4v1l3-1c3-1 6 1 6 4v1l2-1c3 0 6 2 6 5v10c0 9-7 15-16 15h-6c-5 0-9-3-11-7L9 39c-2-3 0-7 4-7 2 0 3 1 5 3l1 2V11c0-3 2-5 5-5Z"
       fill={colores.blanco}
-      stroke={colores.granate}
+      stroke={colores.rosa}
       strokeWidth={3}
       strokeLinejoin="round"
     />
@@ -717,15 +624,26 @@ export const Cierre: React.FC<{
           position: "relative",
           textAlign: "center",
           padding: "30px 60px 40px",
-          background: colores.rosaClaro,
+          background: colores.rosa,
           borderRadius: 44,
           border: `6px solid ${colores.blanco}`,
           boxShadow: sombraSuave,
           transform: `translateY(${(1 - entrada) * -200}px)`,
         }}
       >
-        <Manuscrita tamano={66}>{titulo}</Manuscrita>
-        <TituloGrande tamano={120}>{destacado}</TituloGrande>
+        <Manuscrita
+          tamano={66}
+          style={{ color: colores.amarillo, textShadow: "none" }}
+        >
+          {titulo}
+        </Manuscrita>
+        <TituloGrande
+          tamano={120}
+          color={colores.amarillo}
+          style={{ textShadow: "none" }}
+        >
+          {destacado}
+        </TituloGrande>
         <div
           style={{
             position: "relative",
@@ -739,14 +657,14 @@ export const Cierre: React.FC<{
               position: "absolute",
               inset: 0,
               borderRadius: 999,
-              border: `6px solid ${colores.amarillo}`,
+              border: `6px solid ${colores.blanco}`,
               transform: `scale(${1 + onda * 0.35})`,
               opacity: onda > 0 ? 1 - onda : 0,
             }}
           />
           <Pastilla
-            fondo={pulsado ? colores.amarillo : colores.granate}
-            color={pulsado ? colores.granate : colores.blanco}
+            fondo={pulsado ? colores.blanco : colores.amarillo}
+            color={colores.rosa}
             tamano={50}
             style={{ transform: `scale(${presion})` }}
           >
