@@ -60,8 +60,7 @@ export const BodaParis: React.FC = () => {
               : undefined,
           borderRadius: tarjeta * 40,
           overflow: "hidden",
-          boxShadow:
-            tarjeta > 0 ? "0 30px 60px rgba(214,120,160,0.35)" : undefined,
+          boxShadow: tarjeta > 0 ? "0 30px 60px rgba(76,91,57,0.3)" : undefined,
         }}
       >
         {/* Vídeo original, sin filtros ni zoom */}

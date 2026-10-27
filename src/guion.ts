@@ -7,7 +7,7 @@ export const DURACION_SEG = 56.4;
 export const gancho = {
   hasta: 2.8,
   antes: "planeando mi",
-  titulo: "BODA EN PARÍS",
+  titulo: "BODA EN _PARÍS_", // lo que va entre _ sale en cursiva
   pastilla: "¿low cost? 💸",
 };
 
@@ -15,14 +15,14 @@ export const intro = {
   desde: 2.8,
   hasta: 5.8,
   manuscrita: "bienvenida a",
-  titulo: "EPISODIO 01",
+  titulo: "EPISODIO _01_",
   pastilla: "de mi boda en París",
 };
 
-// "...prefiero gastarlo en viajes": título + avión
+// "...prefiero gastarlo en viajes": solo mientras lo dice (a los 20 s entran sus fotos de bodas)
 export const viajes = {
-  desde: 19,
-  hasta: 23.5,
+  desde: 18.9,
+  hasta: 20.2,
   antes: "prefiero gastarlo en",
   titulo: "viajes ✈️",
 };
@@ -32,21 +32,21 @@ export const titulos: {
   desde: number;
   hasta: number;
   texto: string;
-  color: "rosa" | "amarillo" | "blanco";
+  color: "rosa" | "salvia" | "claro";
 }[] = [
-  { desde: 12.3, hasta: 16.5, texto: "✨ una boda bonita", color: "blanco" },
+  { desde: 12.3, hasta: 16.5, texto: "✨ una boda bonita", color: "claro" },
   {
     desde: 16.7,
-    hasta: 18.9,
+    hasta: 18.8,
     texto: "💸 sin gastar de más",
-    color: "amarillo",
+    color: "salvia",
   },
   { desde: 25, hasta: 31.5, texto: "👇 cómo voy a ahorrar", color: "rosa" },
   {
     desde: 32,
     hasta: 37,
     texto: "💗 gastar en lo importante",
-    color: "blanco",
+    color: "salvia",
   },
 ];
 
@@ -72,7 +72,7 @@ export const comparativa = { desde: 49, hasta: 54, low: 49.3, high: 52.2 };
 export const cierre = {
   desde: 54,
   titulo: "sígueme para el",
-  destacado: "EPISODIO 02",
+  destacado: "EPISODIO _02_",
   boton: "Seguir",
   botonPulsado: "Siguiendo ✓",
 };
