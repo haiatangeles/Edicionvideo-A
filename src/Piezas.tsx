@@ -264,6 +264,217 @@ export const TarjetaIntro: React.FC<{
   );
 };
 
+// Título tipo portada de revista: las letras caen una a una y se juntan
+export const TituloVogue: React.FC<{ antes: string; titulo: string }> = ({
+  antes,
+  titulo,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const { entrada, opacidad } = useEntradaSalida(0);
+  const lineas = interpolate(frame, [14, 34], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const juntar = interpolate(frame, [4, 40], [70, 14], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const flotar = Math.sin(frame / 16) * 4;
+  return (
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
+      <div
+        style={{
+          position: "relative",
+          textAlign: "center",
+          width: 760,
+          boxSizing: "border-box",
+          padding: "26px 40px 34px",
+          background: colores.rosa,
+          borderRadius: 40,
+          border: `6px solid ${colores.blanco}`,
+          boxShadow: sombraSuave,
+          opacity: opacidad,
+          transform: `translateY(${(1 - entrada) * -80 + flotar}px) scale(${0.85 + entrada * 0.15})`,
+        }}
+      >
+        <Manuscrita tamano={60}>{antes}</Manuscrita>
+        <div
+          style={{
+            height: 6,
+            background: colores.amarillo,
+            borderRadius: 3,
+            width: `${lineas * 100}%`,
+            margin: "8px auto 6px",
+          }}
+        />
+        <div
+          style={{
+            fontFamily: fuentes.revista,
+            fontWeight: 800,
+            fontSize: 150,
+            color: colores.granate,
+            letterSpacing: juntar,
+            marginRight: -juntar,
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {titulo.split("").map((letra, i) => {
+            const s = spring({
+              frame: frame - 4 - i * 4,
+              fps,
+              config: { damping: 12 },
+            });
+            return (
+              <span
+                key={i}
+                style={{
+                  display: "inline-block",
+                  opacity: s,
+                  transform: `translateY(${(1 - s) * -60}px)`,
+                }}
+              >
+                {letra}
+              </span>
+            );
+          })}
+        </div>
+        <div
+          style={{
+            height: 6,
+            background: colores.amarillo,
+            borderRadius: 3,
+            width: `${lineas * 100}%`,
+            margin: "10px auto 0",
+          }}
+        />
+        <Destello x={-30} y={-30} tamano={64} desfase={0} />
+        <Destello
+          derecha={-22}
+          y={60}
+          tamano={44}
+          color={colores.blanco}
+          desfase={12}
+        />
+        <Destello
+          x={40}
+          y={190}
+          tamano={34}
+          color={colores.blanco}
+          desfase={25}
+        />
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+const Avioncito: React.FC = () => (
+  <svg viewBox="0 0 100 100" width={130} height={130}>
+    <path
+      d="M50 5 C54 5 56 10 56 16 L56 38 L92 58 L92 66 L56 55 L56 78 L68 87 L68 93 L50 88 L32 93 L32 87 L44 78 L44 55 L8 66 L8 58 L44 38 L44 16 C44 10 46 5 50 5Z"
+      fill={colores.rosa}
+      stroke={colores.granate}
+      strokeWidth={3}
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+// Título de viajes + avión que cruza por arriba dejando una estela de puntitos
+export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
+  antes,
+  titulo,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const a = useEntradaSalida(0);
+  const b = useEntradaSalida(6);
+  const p = interpolate(frame, [4, 4 + 2.8 * fps], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const ruta = (q: number) => ({
+    x: -150 + q * 1380,
+    y: 560 - Math.sin(q * Math.PI) * 200 - q * 60,
+  });
+  const pos = ruta(p);
+  const delante = ruta(Math.min(1, p + 0.01));
+  const angulo =
+    (Math.atan2(delante.y - pos.y, delante.x - pos.x) * 180) / Math.PI + 90;
+  const puntos = new Array(44)
+    .fill(0)
+    .map((_, i) => i / 44)
+    .filter((q) => q < p - 0.04)
+    .map((q) => ruta(q));
+  const flotar = Math.sin(frame / 14) * 5;
+  return (
+    <AbsoluteFill>
+      <svg
+        width={1080}
+        height={1920}
+        style={{ position: "absolute", opacity: a.salida }}
+      >
+        {puntos.map((d, i) => (
+          <circle
+            key={i}
+            cx={d.x}
+            cy={d.y}
+            r={7}
+            fill={colores.blanco}
+            stroke={colores.rosa}
+            strokeWidth={3}
+          />
+        ))}
+      </svg>
+      {p > 0 && p < 1 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: pos.x - 65,
+            top: pos.y - 65,
+            transform: `rotate(${angulo}deg)`,
+          }}
+        >
+          <Avioncito />
+        </div>
+      ) : null}
+      <AbsoluteFill style={{ alignItems: "center", paddingTop: 150 }}>
+        <Manuscrita
+          tamano={62}
+          style={{
+            opacity: a.opacidad,
+            transform: `translateY(${(1 - a.entrada) * 30}px) rotate(-3deg)`,
+            background: colores.rosaClaro,
+            padding: "0 30px 6px",
+            borderRadius: 999,
+            boxShadow: sombraSuave,
+          }}
+        >
+          {antes}
+        </Manuscrita>
+        <div
+          style={{
+            position: "relative",
+            marginTop: 6,
+            opacity: b.opacidad,
+            transform: `scale(${b.entrada}) rotate(-3deg) translateY(${flotar}px)`,
+          }}
+        >
+          <Pastilla
+            fondo={colores.amarillo}
+            color={colores.granate}
+            tamano={84}
+          >
+            {titulo}
+          </Pastilla>
+          <Destello derecha={-20} y={-26} tamano={50} color={colores.rosa} />
+        </div>
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
 const fondoPorColor = {
   rosa: colores.rosa,
   amarillo: colores.amarillo,

@@ -17,7 +17,9 @@ import {
   lista,
   pregunta,
   titulos,
+  viajes,
   VIDEO,
+  vogue,
 } from "./guion";
 import {
   BarraProgreso,
@@ -29,6 +31,8 @@ import {
   Pregunta,
   TarjetaIntro,
   TituloDidactico,
+  TituloVogue,
+  Viajes,
 } from "./Piezas";
 
 export const BodaParis: React.FC = () => {
@@ -86,6 +90,20 @@ export const BodaParis: React.FC = () => {
           titulo={intro.titulo}
           pastilla={intro.pastilla}
         />
+      </Sequence>
+      <Sequence
+        name="Vogue"
+        from={f(vogue.desde)}
+        durationInFrames={f(vogue.hasta - vogue.desde)}
+      >
+        <TituloVogue antes={vogue.antes} titulo={vogue.titulo} />
+      </Sequence>
+      <Sequence
+        name="Viajes"
+        from={f(viajes.desde)}
+        durationInFrames={f(viajes.hasta - viajes.desde)}
+      >
+        <Viajes antes={viajes.antes} titulo={viajes.titulo} />
       </Sequence>
       {titulos.map((t) => (
         <Sequence

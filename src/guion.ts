@@ -19,6 +19,22 @@ export const intro = {
   pastilla: "de mi boda en París",
 };
 
+// "Quiero una boda tipo Vogue" (momento estimado: no hay subtítulos en esa parte)
+export const vogue = {
+  desde: 8.8,
+  hasta: 12.2,
+  antes: "una boda tipo",
+  titulo: "VOGUE",
+};
+
+// "...prefiero gastarlo en viajes": título + avión
+export const viajes = {
+  desde: 19,
+  hasta: 23.5,
+  antes: "prefiero gastarlo en",
+  titulo: "viajes ✈️",
+};
+
 // Títulos didácticos arriba del todo
 export const titulos: {
   desde: number;
@@ -26,8 +42,13 @@ export const titulos: {
   texto: string;
   color: "rosa" | "amarillo" | "blanco";
 }[] = [
-  { desde: 12, hasta: 16.5, texto: "✨ una boda bonita", color: "blanco" },
-  { desde: 17, hasta: 21, texto: "💸 sin gastar de más", color: "amarillo" },
+  { desde: 12.3, hasta: 16.5, texto: "✨ una boda bonita", color: "blanco" },
+  {
+    desde: 16.7,
+    hasta: 18.9,
+    texto: "💸 sin gastar de más",
+    color: "amarillo",
+  },
   { desde: 25, hasta: 31.5, texto: "👇 cómo voy a ahorrar", color: "rosa" },
   {
     desde: 32,

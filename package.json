@@ -10,6 +10,7 @@
   "private": true,
   "dependencies": {
     "@fontsource/anton": "^5.3.0",
+    "@fontsource/bodoni-moda": "^5.3.0",
     "@fontsource/dancing-script": "^5.3.0",
     "@fontsource/poppins": "^5.3.0",
     "@remotion/captions": "4.0.538",
