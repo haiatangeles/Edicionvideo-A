@@ -1,6 +1,7 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Html5Audio,
   OffthreadVideo,
   Sequence,
   interpolate,
@@ -191,6 +192,20 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
         />
       </Sequence>
       <BarraProgreso />
+      {(guion.sonidos ?? []).map((s, i) => (
+        <Sequence
+          key={i}
+          name={`Sonido ${s.archivo}`}
+          from={fs(s.en)}
+          durationInFrames={f(3)}
+          layout="none"
+        >
+          <Html5Audio
+            src={staticFile(`sfx/${s.archivo}.wav`)}
+            volume={s.volumen}
+          />
+        </Sequence>
+      ))}
     </AbsoluteFill>
   );
 };

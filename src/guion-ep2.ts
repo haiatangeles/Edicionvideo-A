@@ -84,7 +84,6 @@ export const episodio2: Guion = {
     antes: "mi presupuesto",
     cantidad: 5000,
     en: 25.5,
-    despues: "dólares",
   },
 
   lista: {
@@ -107,8 +106,25 @@ export const episodio2: Guion = {
     titulo: "viajar",
   },
 
+  // Sonidos solo en lo más importante (tiempos del vídeo original)
+  sonidos: [
+    { en: 3, archivo: "whoosh", volumen: 0.3 }, // entra la tarjeta del episodio
+    { en: 12.8, archivo: "pop", volumen: 0.35 }, // "Presupuesto"
+    { en: 26.3, archivo: "ding", volumen: 0.35 }, // el contador llega a $5,000
+    { en: 26.35, archivo: "brillos", volumen: 0.35 },
+    { en: 29.2, archivo: "click", volumen: 0.4 }, // cada prioridad de la lista
+    { en: 31.5, archivo: "click", volumen: 0.4 },
+    { en: 34.5, archivo: "click", volumen: 0.4 },
+    { en: 36.1, archivo: "click", volumen: 0.4 },
+    { en: 52.45, archivo: "brillos", volumen: 0.35 }, // "yo lo quiero"
+    { en: 71.3, archivo: "brillos", volumen: 0.25 }, // "mi amor"
+    { en: 87.3, archivo: "avion", volumen: 0.35 }, // "viajar"
+    { en: 96.67, archivo: "click", volumen: 0.45 }, // el dedo pulsa "Seguir"
+    { en: 96.72, archivo: "ding", volumen: 0.3 },
+  ],
+
   cierre: {
-    desde: 93.9,
+    desde: 95.6,
     titulo: "sígueme para el",
     destacado: "EPISODIO 03",
     boton: "Seguir",

@@ -14,7 +14,7 @@ export type Guion = {
     antes: string;
     cantidad: number;
     en: number;
-    despues: string;
+    despues?: string;
   };
   lista?: Tramo & { titulo: string; puntos: { texto: string; en: number }[] };
   pregunta?: Tramo & { texto: string };
@@ -26,6 +26,8 @@ export type Guion = {
     boton: string;
     botonPulsado: string;
   };
+  // Efectos de sonido (archivos en public/sfx), solo en los momentos importantes
+  sonidos?: { en: number; archivo: string; volumen: number }[];
   // Partes del vídeo original que se quedan (en segundos). Sin cortes = vídeo entero.
   cortes?: [number, number][];
 };

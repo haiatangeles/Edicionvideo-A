@@ -865,7 +865,7 @@ export const Contador: React.FC<{
   antes: string;
   cantidad: number;
   enFrames: number;
-  despues: string;
+  despues?: string;
 }> = ({ antes, cantidad, enFrames, despues }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -902,7 +902,7 @@ export const Contador: React.FC<{
           <TextoVintage tamano={124} mayusculas>
             {`$${valor}`}
           </TextoVintage>
-          <TextoVintage tamano={40}>{despues}</TextoVintage>
+          {despues ? <TextoVintage tamano={40}>{despues}</TextoVintage> : null}
         </BannerVintage>
         <Sticker
           nombre="anillos"
