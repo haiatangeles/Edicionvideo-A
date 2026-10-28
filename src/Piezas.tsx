@@ -1,6 +1,8 @@
-import React from "react";
+import { Caption, createTikTokStyleCaptions } from "@remotion/captions";
+import React, { useMemo } from "react";
 import {
   AbsoluteFill,
+  Easing,
   Img,
   interpolate,
   spring,
@@ -284,8 +286,10 @@ export const Gancho: React.FC<{
           transform: `scale(${c.entrada}) rotate(-3deg)`,
         }}
       >
-        <BannerVintage ancho={440}>
-          <TextoVintage tamano={60}>{pastilla}</TextoVintage>
+        <BannerVintage ancho={Math.max(440, pastilla.length * 32)}>
+          <TextoVintage tamano={60} style={{ whiteSpace: "nowrap" }}>
+            {pastilla}
+          </TextoVintage>
         </BannerVintage>
       </div>
       <Sticker
@@ -491,9 +495,16 @@ export const TituloDidactico: React.FC<{ texto: string; sticker: string }> = ({
         }}
       >
         <BannerVintage ancho={720}>
-          <TextoVintage tamano={68} anchoMax={720 * 0.7}>
-            {texto}
-          </TextoVintage>
+          {/* Los títulos largos pasan a dos líneas en vez de encogerse */}
+          {texto.length > 24 ? (
+            <TextoVintage tamano={62} style={{ whiteSpace: "pre-line" }}>
+              {texto}
+            </TextoVintage>
+          ) : (
+            <TextoVintage tamano={68} anchoMax={720 * 0.7}>
+              {texto}
+            </TextoVintage>
+          )}
         </BannerVintage>
         <Sticker
           nombre={sticker}
@@ -847,5 +858,126 @@ export const BarraProgreso: React.FC = () => {
         }}
       />
     </div>
+  );
+};
+
+// Subtítulos palabra a palabra, estilo máquina de escribir (como los del episodio 1)
+export const Subtitulos: React.FC<{
+  subtitulos: Caption[];
+  ocultar: [number, number][];
+}> = ({ subtitulos, ocultar }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const ms = (frame / fps) * 1000;
+  const paginas = useMemo(
+    () =>
+      createTikTokStyleCaptions({
+        captions: subtitulos,
+        combineTokensWithinMilliseconds: 1600,
+      }).pages,
+    [subtitulos],
+  );
+  if (ocultar.some(([a, b]) => ms >= a * 1000 && ms < b * 1000)) {
+    return null;
+  }
+  const pagina = paginas.find(
+    (p) => ms >= p.startMs && ms < p.startMs + p.durationMs,
+  );
+  if (!pagina) {
+    return null;
+  }
+  const visibles = pagina.tokens.filter((t) => t.fromMs <= ms);
+  return (
+    <AbsoluteFill
+      style={{
+        justifyContent: "flex-end",
+        alignItems: "center",
+        paddingBottom: 470,
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 860,
+          textAlign: "center",
+          fontFamily: fuentes.texto,
+          fontWeight: 600,
+          fontSize: 46,
+          lineHeight: 1.25,
+          color: colores.blanco,
+          textShadow: "0 2px 8px rgba(0,0,0,0.45), 0 0 2px rgba(0,0,0,0.5)",
+        }}
+      >
+        {visibles.map((t) => t.text).join("")}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// Cifra que sube de 0 a la cantidad justo cuando se dice, dentro del banner vintage
+export const Contador: React.FC<{
+  antes: string;
+  cantidad: number;
+  enFrames: number;
+  despues: string;
+}> = ({ antes, cantidad, enFrames, despues }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const { entrada, opacidad } = useEntradaSalida(0);
+  const subir = interpolate(
+    frame,
+    [enFrames - 8, enFrames + 0.8 * fps],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.cubic),
+    },
+  );
+  const latido = spring({
+    frame: frame - (enFrames + Math.round(0.8 * fps)),
+    fps,
+    config: { damping: 8 },
+  });
+  const valor = Math.round(cantidad * subir).toLocaleString("en-US");
+  return (
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 110 }}>
+      <div
+        style={{
+          position: "relative",
+          opacity: opacidad,
+          transform: `scale(${(0.7 + entrada * 0.3) * (1 + (subir === 1 ? (1 - latido) * 0.08 : 0))}) rotate(-2deg)`,
+        }}
+      >
+        <BannerVintage ancho={780}>
+          <Manuscrita tamano={52} vintage>
+            {antes}
+          </Manuscrita>
+          <TextoVintage tamano={124} mayusculas>
+            {`$${valor}`}
+          </TextoVintage>
+          <TextoVintage tamano={40}>{despues}</TextoVintage>
+        </BannerVintage>
+        <Sticker
+          nombre="anillos"
+          ancho={150}
+          derecha={-60}
+          y={-50}
+          giro={14}
+          retraso={4}
+        />
+        {subir === 1 ? (
+          <>
+            <Destello x={30} y={-20} tamano={56} />
+            <Destello
+              derecha={110}
+              y={250}
+              tamano={40}
+              color={colores.rosa}
+              desfase={10}
+            />
+          </>
+        ) : null}
+      </div>
+    </AbsoluteFill>
   );
 };

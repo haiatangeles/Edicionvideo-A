@@ -9,34 +9,37 @@ import {
   useVideoConfig,
 } from "remotion";
 import { colores } from "./estilo";
-import {
-  cierre,
-  comparativa,
-  gancho,
-  intro,
-  lista,
-  pregunta,
-  titulos,
-  viajes,
-  VIDEO,
-} from "./guion";
+import { Guion } from "./guion";
 import {
   BarraProgreso,
   Cierre,
   Comparativa,
+  Contador,
   FondoCuadricula,
   Gancho,
   Lista,
   Pregunta,
+  Subtitulos,
   TarjetaIntro,
   TituloDidactico,
   Viajes,
 } from "./Piezas";
 
-export const BodaParis: React.FC = () => {
+export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const f = (seg: number) => Math.round(seg * fps);
+  const {
+    gancho,
+    intro,
+    viajes,
+    titulos,
+    contador,
+    lista,
+    pregunta,
+    comparativa,
+    cierre,
+  } = guion;
 
   // Durante la intro el vídeo se encoge dentro de una tarjeta, como en la referencia
   const tarjeta = interpolate(
@@ -66,10 +69,17 @@ export const BodaParis: React.FC = () => {
       >
         {/* Vídeo original, sin filtros ni zoom */}
         <OffthreadVideo
-          src={staticFile(VIDEO)}
+          src={staticFile(guion.video)}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
       </AbsoluteFill>
+
+      {guion.subtitulos ? (
+        <Subtitulos
+          subtitulos={guion.subtitulos}
+          ocultar={[[intro.desde, intro.hasta]]}
+        />
+      ) : null}
 
       <Sequence name="Gancho" durationInFrames={f(gancho.hasta)}>
         <Gancho
@@ -89,13 +99,15 @@ export const BodaParis: React.FC = () => {
           pastilla={intro.pastilla}
         />
       </Sequence>
-      <Sequence
-        name="Viajes"
-        from={f(viajes.desde)}
-        durationInFrames={f(viajes.hasta - viajes.desde)}
-      >
-        <Viajes antes={viajes.antes} titulo={viajes.titulo} />
-      </Sequence>
+      {viajes ? (
+        <Sequence
+          name="Viajes"
+          from={f(viajes.desde)}
+          durationInFrames={f(viajes.hasta - viajes.desde)}
+        >
+          <Viajes antes={viajes.antes} titulo={viajes.titulo} />
+        </Sequence>
+      ) : null}
       {titulos.map((t) => (
         <Sequence
           key={t.texto}
@@ -106,33 +118,53 @@ export const BodaParis: React.FC = () => {
           <TituloDidactico texto={t.texto} sticker={t.sticker} />
         </Sequence>
       ))}
-      <Sequence
-        name="Lista"
-        from={f(lista.desde)}
-        durationInFrames={f(lista.hasta - lista.desde)}
-      >
-        <Lista
-          titulo={lista.titulo}
-          puntos={lista.puntos.map((p) => ({
-            texto: p.texto,
-            enFrames: f(p.en - lista.desde),
-          }))}
-        />
-      </Sequence>
-      <Sequence
-        name="Pregunta"
-        from={f(pregunta.desde)}
-        durationInFrames={f(pregunta.hasta - pregunta.desde)}
-      >
-        <Pregunta texto={pregunta.texto} />
-      </Sequence>
-      <Sequence
-        name="Low vs High"
-        from={f(comparativa.desde)}
-        durationInFrames={f(comparativa.hasta - comparativa.desde)}
-      >
-        <Comparativa altoEnFrames={f(comparativa.high - comparativa.desde)} />
-      </Sequence>
+      {contador ? (
+        <Sequence
+          name="Contador"
+          from={f(contador.desde)}
+          durationInFrames={f(contador.hasta - contador.desde)}
+        >
+          <Contador
+            antes={contador.antes}
+            cantidad={contador.cantidad}
+            enFrames={f(contador.en - contador.desde)}
+            despues={contador.despues}
+          />
+        </Sequence>
+      ) : null}
+      {lista ? (
+        <Sequence
+          name="Lista"
+          from={f(lista.desde)}
+          durationInFrames={f(lista.hasta - lista.desde)}
+        >
+          <Lista
+            titulo={lista.titulo}
+            puntos={lista.puntos.map((p) => ({
+              texto: p.texto,
+              enFrames: f(p.en - lista.desde),
+            }))}
+          />
+        </Sequence>
+      ) : null}
+      {pregunta ? (
+        <Sequence
+          name="Pregunta"
+          from={f(pregunta.desde)}
+          durationInFrames={f(pregunta.hasta - pregunta.desde)}
+        >
+          <Pregunta texto={pregunta.texto} />
+        </Sequence>
+      ) : null}
+      {comparativa ? (
+        <Sequence
+          name="Low vs High"
+          from={f(comparativa.desde)}
+          durationInFrames={f(comparativa.hasta - comparativa.desde)}
+        >
+          <Comparativa altoEnFrames={f(comparativa.high - comparativa.desde)} />
+        </Sequence>
+      ) : null}
       <Sequence name="Cierre" from={f(cierre.desde)}>
         <Cierre
           titulo={cierre.titulo}

@@ -1,68 +1,106 @@
-// Guion de la edición (tiempos en segundos del vídeo original).
+import { Caption } from "@remotion/captions";
+
+// Guion de cada episodio (tiempos en segundos del vídeo original).
 // Para cambiar un texto o un momento, se edita aquí.
 
-export const VIDEO = "mi-video.mp4";
-export const DURACION_SEG = 56.4;
+type Tramo = { desde: number; hasta: number };
 
-export const gancho = {
-  hasta: 2.8,
-  antes: "planeando mi",
-  titulo: "BODA EN PARÍS",
-  pastilla: "¿low cost?",
+export type Guion = {
+  video: string;
+  duracionSeg: number;
+  gancho: { hasta: number; antes: string; titulo: string; pastilla: string };
+  intro: Tramo & { manuscrita: string; titulo: string; pastilla: string };
+  viajes?: Tramo & { antes: string; titulo: string };
+  titulos: (Tramo & { texto: string; sticker: string })[];
+  contador?: Tramo & {
+    antes: string;
+    cantidad: number;
+    en: number;
+    despues: string;
+  };
+  lista?: Tramo & { titulo: string; puntos: { texto: string; en: number }[] };
+  pregunta?: Tramo & { texto: string };
+  comparativa?: Tramo & { low: number; high: number };
+  cierre: {
+    desde: number;
+    titulo: string;
+    destacado: string;
+    boton: string;
+    botonPulsado: string;
+  };
+  // Subtítulos propios (el episodio 1 ya los trae grabados en el vídeo)
+  subtitulos?: Caption[];
 };
 
-export const intro = {
-  desde: 2.8,
-  hasta: 5.8,
-  manuscrita: "bienvenida a",
-  titulo: "EPISODIO 01",
-  pastilla: "de mi boda en París",
-};
+export const episodio1: Guion = {
+  video: "mi-video.mp4",
+  duracionSeg: 56.4,
 
-// "...prefiero gastarlo en viajes": solo mientras lo dice (a los 20 s entran sus fotos de bodas)
-export const viajes = {
-  desde: 18.9,
-  hasta: 20.2,
-  antes: "prefiero gastarlo en",
-  titulo: "viajes",
-};
+  gancho: {
+    hasta: 2.8,
+    antes: "planeando mi",
+    titulo: "BODA EN PARÍS",
+    pastilla: "¿low cost?",
+  },
 
-// Títulos didácticos arriba del todo
-export const titulos: {
-  desde: number;
-  hasta: number;
-  texto: string;
-  sticker: string;
-}[] = [
-  { desde: 12.3, hasta: 16.5, texto: "una boda bonita", sticker: "vestido" },
-  { desde: 16.7, hasta: 18.8, texto: "sin gastar de más", sticker: "anillos" },
-  { desde: 25, hasta: 31.5, texto: "cómo voy a ahorrar", sticker: "pastel" },
-  { desde: 32, hasta: 37, texto: "gastar en lo importante", sticker: "rosas" },
-];
+  intro: {
+    desde: 2.8,
+    hasta: 5.8,
+    manuscrita: "bienvenida a",
+    titulo: "EPISODIO 01",
+    pastilla: "de mi boda en París",
+  },
 
-export const lista = {
-  desde: 37,
-  hasta: 44,
-  titulo: "Te voy a enseñar:",
-  puntos: [
-    { texto: "Todo el proceso", en: 37.3 },
-    { texto: "Los precios", en: 39.8 },
-    { texto: "Proveedores", en: 41 },
+  // "...prefiero gastarlo en viajes": solo mientras lo dice (a los 20 s entran sus fotos de bodas)
+  viajes: {
+    desde: 18.9,
+    hasta: 20.2,
+    antes: "prefiero gastarlo en",
+    titulo: "viajes",
+  },
+
+  // Títulos didácticos arriba del todo
+  titulos: [
+    { desde: 12.3, hasta: 16.5, texto: "una boda bonita", sticker: "vestido" },
+    {
+      desde: 16.7,
+      hasta: 18.8,
+      texto: "sin gastar de más",
+      sticker: "anillos",
+    },
+    { desde: 25, hasta: 31.5, texto: "cómo voy a ahorrar", sticker: "pastel" },
+    {
+      desde: 32,
+      hasta: 37,
+      texto: "gastar en lo importante",
+      sticker: "rosas",
+    },
   ],
-};
 
-export const pregunta = {
-  desde: 44.5,
-  hasta: 49,
-  texto: "¿Se puede tener una boda en París?",
-};
+  lista: {
+    desde: 37,
+    hasta: 44,
+    titulo: "Te voy a enseñar:",
+    puntos: [
+      { texto: "Todo el proceso", en: 37.3 },
+      { texto: "Los precios", en: 39.8 },
+      { texto: "Proveedores", en: 41 },
+    ],
+  },
 
-export const comparativa = { desde: 49, hasta: 54, low: 49.3, high: 52.2 };
+  pregunta: {
+    desde: 44.5,
+    hasta: 49,
+    texto: "¿Se puede tener una boda en París?",
+  },
 
-export const cierre = {
-  desde: 54,
-  titulo: "sígueme para el",
-  destacado: "EPISODIO 02",
-  boton: "Seguir",
-  botonPulsado: "Siguiendo ✓",
+  comparativa: { desde: 49, hasta: 54, low: 49.3, high: 52.2 },
+
+  cierre: {
+    desde: 54,
+    titulo: "sígueme para el",
+    destacado: "EPISODIO 02",
+    boton: "Seguir",
+    botonPulsado: "Siguiendo ✓",
+  },
 };

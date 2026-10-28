@@ -36,7 +36,7 @@
     "lint": "eslint src && tsc",
     "whisper:instalar": "node scripts/instalar-whisper.mjs",
     "transcribir": "node scripts/transcribir.mjs",
-    "render": "remotion render Vertical out/video.mp4"
+    "render": "remotion render Episodio2 out/episodio-2.mp4"
   },
   "allowScripts": {
     "esbuild": false
