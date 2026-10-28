@@ -1,5 +1,3 @@
-import { Caption } from "@remotion/captions";
-
 // Guion de cada episodio (tiempos en segundos del vídeo original).
 // Para cambiar un texto o un momento, se edita aquí.
 
@@ -28,8 +26,26 @@ export type Guion = {
     boton: string;
     botonPulsado: string;
   };
-  // Subtítulos propios (el episodio 1 ya los trae grabados en el vídeo)
-  subtitulos?: Caption[];
+  // Partes del vídeo original que se quedan (en segundos). Sin cortes = vídeo entero.
+  cortes?: [number, number][];
+};
+
+// Cuánto dura el vídeo editado
+export const duracionSalida = (guion: Guion) =>
+  (guion.cortes ?? [[0, guion.duracionSeg]]).reduce(
+    (t, [a, b]) => t + b - a,
+    0,
+  );
+
+// Pasa un tiempo del vídeo original al vídeo editado (lo cortado se "pega" al siguiente tramo)
+export const tiempoSalida = (guion: Guion, t: number) => {
+  let acumulado = 0;
+  for (const [a, b] of guion.cortes ?? [[0, guion.duracionSeg]]) {
+    if (t <= a) return acumulado;
+    if (t < b) return acumulado + (t - a);
+    acumulado += b - a;
+  }
+  return acumulado;
 };
 
 export const episodio1: Guion = {

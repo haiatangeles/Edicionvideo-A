@@ -1,5 +1,4 @@
-import { Caption, createTikTokStyleCaptions } from "@remotion/captions";
-import React, { useMemo } from "react";
+import React from "react";
 import {
   AbsoluteFill,
   Easing,
@@ -494,14 +493,14 @@ export const TituloDidactico: React.FC<{ texto: string; sticker: string }> = ({
           transform: `translateY(${(1 - entrada) * -60 + flotar}px) rotate(-2deg)`,
         }}
       >
-        <BannerVintage ancho={720}>
+        <BannerVintage ancho={780}>
           {/* Los títulos largos pasan a dos líneas en vez de encogerse */}
           {texto.length > 24 ? (
-            <TextoVintage tamano={62} style={{ whiteSpace: "pre-line" }}>
+            <TextoVintage tamano={72} style={{ whiteSpace: "pre-line" }}>
               {texto}
             </TextoVintage>
           ) : (
-            <TextoVintage tamano={68} anchoMax={720 * 0.7}>
+            <TextoVintage tamano={84} anchoMax={780 * 0.72}>
               {texto}
             </TextoVintage>
           )}
@@ -858,58 +857,6 @@ export const BarraProgreso: React.FC = () => {
         }}
       />
     </div>
-  );
-};
-
-// Subtítulos palabra a palabra, estilo máquina de escribir (como los del episodio 1)
-export const Subtitulos: React.FC<{
-  subtitulos: Caption[];
-  ocultar: [number, number][];
-}> = ({ subtitulos, ocultar }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const ms = (frame / fps) * 1000;
-  const paginas = useMemo(
-    () =>
-      createTikTokStyleCaptions({
-        captions: subtitulos,
-        combineTokensWithinMilliseconds: 1600,
-      }).pages,
-    [subtitulos],
-  );
-  if (ocultar.some(([a, b]) => ms >= a * 1000 && ms < b * 1000)) {
-    return null;
-  }
-  const pagina = paginas.find(
-    (p) => ms >= p.startMs && ms < p.startMs + p.durationMs,
-  );
-  if (!pagina) {
-    return null;
-  }
-  const visibles = pagina.tokens.filter((t) => t.fromMs <= ms);
-  return (
-    <AbsoluteFill
-      style={{
-        justifyContent: "flex-end",
-        alignItems: "center",
-        paddingBottom: 470,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 860,
-          textAlign: "center",
-          fontFamily: fuentes.texto,
-          fontWeight: 600,
-          fontSize: 46,
-          lineHeight: 1.25,
-          color: colores.blanco,
-          textShadow: "0 2px 8px rgba(0,0,0,0.45), 0 0 2px rgba(0,0,0,0.5)",
-        }}
-      >
-        {visibles.map((t) => t.text).join("")}
-      </div>
-    </AbsoluteFill>
   );
 };
 

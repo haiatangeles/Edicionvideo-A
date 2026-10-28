@@ -9,7 +9,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { colores } from "./estilo";
-import { Guion } from "./guion";
+import { Guion, tiempoSalida } from "./guion";
 import {
   BarraProgreso,
   Cierre,
@@ -19,7 +19,6 @@ import {
   Gancho,
   Lista,
   Pregunta,
-  Subtitulos,
   TarjetaIntro,
   TituloDidactico,
   Viajes,
@@ -29,6 +28,12 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const f = (seg: number) => Math.round(seg * fps);
+  // Tiempos del guion (vídeo original) -> frames del vídeo editado
+  const fs = (seg: number) => f(tiempoSalida(guion, seg));
+  // Un elemento que tras los cortes dura menos de 1,2 s no se muestra
+  const cabe = (desde: number, hasta: number) =>
+    fs(hasta) - fs(desde) >= f(1.2);
+  const tramos = guion.cortes ?? [[0, guion.duracionSeg]];
   const {
     gancho,
     intro,
@@ -44,7 +49,12 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
   // Durante la intro el vídeo se encoge dentro de una tarjeta, como en la referencia
   const tarjeta = interpolate(
     frame,
-    [f(intro.desde), f(intro.desde) + 10, f(intro.hasta) - 10, f(intro.hasta)],
+    [
+      fs(intro.desde),
+      fs(intro.desde) + 10,
+      fs(intro.hasta) - 10,
+      fs(intro.hasta),
+    ],
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
@@ -67,21 +77,24 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
             tarjeta > 0 ? "0 30px 60px rgba(120,90,70,0.35)" : undefined,
         }}
       >
-        {/* Vídeo original, sin filtros ni zoom */}
-        <OffthreadVideo
-          src={staticFile(guion.video)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
+        {/* Vídeo original, sin filtros ni zoom; cada tramo que se queda va seguido del anterior */}
+        {tramos.map(([a, b], i) => (
+          <Sequence
+            key={a}
+            name={`Tramo ${i + 1}`}
+            from={fs(a)}
+            durationInFrames={f(b - a)}
+          >
+            <OffthreadVideo
+              src={staticFile(guion.video)}
+              trimBefore={f(a)}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </Sequence>
+        ))}
       </AbsoluteFill>
 
-      {guion.subtitulos ? (
-        <Subtitulos
-          subtitulos={guion.subtitulos}
-          ocultar={[[intro.desde, intro.hasta]]}
-        />
-      ) : null}
-
-      <Sequence name="Gancho" durationInFrames={f(gancho.hasta)}>
+      <Sequence name="Gancho" durationInFrames={fs(gancho.hasta)}>
         <Gancho
           antes={gancho.antes}
           titulo={gancho.titulo}
@@ -90,8 +103,8 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
       </Sequence>
       <Sequence
         name="Intro"
-        from={f(intro.desde)}
-        durationInFrames={f(intro.hasta - intro.desde)}
+        from={fs(intro.desde)}
+        durationInFrames={fs(intro.hasta) - fs(intro.desde)}
       >
         <TarjetaIntro
           manuscrita={intro.manuscrita}
@@ -99,73 +112,77 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
           pastilla={intro.pastilla}
         />
       </Sequence>
-      {viajes ? (
+      {viajes && cabe(viajes.desde, viajes.hasta) ? (
         <Sequence
           name="Viajes"
-          from={f(viajes.desde)}
-          durationInFrames={f(viajes.hasta - viajes.desde)}
+          from={fs(viajes.desde)}
+          durationInFrames={fs(viajes.hasta) - fs(viajes.desde)}
         >
           <Viajes antes={viajes.antes} titulo={viajes.titulo} />
         </Sequence>
       ) : null}
-      {titulos.map((t) => (
-        <Sequence
-          key={t.texto}
-          name={t.texto}
-          from={f(t.desde)}
-          durationInFrames={f(t.hasta - t.desde)}
-        >
-          <TituloDidactico texto={t.texto} sticker={t.sticker} />
-        </Sequence>
-      ))}
-      {contador ? (
+      {titulos
+        .filter((t) => cabe(t.desde, t.hasta))
+        .map((t) => (
+          <Sequence
+            key={t.texto}
+            name={t.texto}
+            from={fs(t.desde)}
+            durationInFrames={fs(t.hasta) - fs(t.desde)}
+          >
+            <TituloDidactico texto={t.texto} sticker={t.sticker} />
+          </Sequence>
+        ))}
+      {contador && cabe(contador.desde, contador.hasta) ? (
         <Sequence
           name="Contador"
-          from={f(contador.desde)}
-          durationInFrames={f(contador.hasta - contador.desde)}
+          from={fs(contador.desde)}
+          durationInFrames={fs(contador.hasta) - fs(contador.desde)}
         >
           <Contador
             antes={contador.antes}
             cantidad={contador.cantidad}
-            enFrames={f(contador.en - contador.desde)}
+            enFrames={fs(contador.en) - fs(contador.desde)}
             despues={contador.despues}
           />
         </Sequence>
       ) : null}
-      {lista ? (
+      {lista && cabe(lista.desde, lista.hasta) ? (
         <Sequence
           name="Lista"
-          from={f(lista.desde)}
-          durationInFrames={f(lista.hasta - lista.desde)}
+          from={fs(lista.desde)}
+          durationInFrames={fs(lista.hasta) - fs(lista.desde)}
         >
           <Lista
             titulo={lista.titulo}
             puntos={lista.puntos.map((p) => ({
               texto: p.texto,
-              enFrames: f(p.en - lista.desde),
+              enFrames: fs(p.en) - fs(lista.desde),
             }))}
           />
         </Sequence>
       ) : null}
-      {pregunta ? (
+      {pregunta && cabe(pregunta.desde, pregunta.hasta) ? (
         <Sequence
           name="Pregunta"
-          from={f(pregunta.desde)}
-          durationInFrames={f(pregunta.hasta - pregunta.desde)}
+          from={fs(pregunta.desde)}
+          durationInFrames={fs(pregunta.hasta) - fs(pregunta.desde)}
         >
           <Pregunta texto={pregunta.texto} />
         </Sequence>
       ) : null}
-      {comparativa ? (
+      {comparativa && cabe(comparativa.desde, comparativa.hasta) ? (
         <Sequence
           name="Low vs High"
-          from={f(comparativa.desde)}
-          durationInFrames={f(comparativa.hasta - comparativa.desde)}
+          from={fs(comparativa.desde)}
+          durationInFrames={fs(comparativa.hasta) - fs(comparativa.desde)}
         >
-          <Comparativa altoEnFrames={f(comparativa.high - comparativa.desde)} />
+          <Comparativa
+            altoEnFrames={fs(comparativa.high) - fs(comparativa.desde)}
+          />
         </Sequence>
       ) : null}
-      <Sequence name="Cierre" from={f(cierre.desde)}>
+      <Sequence name="Cierre" from={fs(cierre.desde)}>
         <Cierre
           titulo={cierre.titulo}
           destacado={cierre.destacado}

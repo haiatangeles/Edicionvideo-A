@@ -1,6 +1,4 @@
-import { Caption } from "@remotion/captions";
 import { Guion } from "./guion";
-import subtitulos from "./subtitulos-ep2.json";
 
 // Episodio 02: el presupuesto real (tiempos sacados de la transcripción con Whisper)
 export const episodio2: Guion = {
@@ -11,12 +9,12 @@ export const episodio2: Guion = {
     hasta: 3,
     antes: "planeando mi",
     titulo: "BODA EN PARÍS",
-    pastilla: "con presupuesto real",
+    pastilla: "¿low cost?",
   },
 
   intro: {
     desde: 3,
-    hasta: 6,
+    hasta: 5.6,
     manuscrita: "bienvenida a",
     titulo: "EPISODIO 02",
     pastilla: "de mi boda en París",
@@ -26,7 +24,7 @@ export const episodio2: Guion = {
     {
       desde: 12.8,
       hasta: 18.4,
-      texto: "hablemos del presupuesto",
+      texto: "Presupuesto",
       sticker: "corazon",
     },
     {
@@ -116,6 +114,16 @@ export const episodio2: Guion = {
     boton: "Seguir",
     botonPulsado: "Siguiendo ✓",
   },
+};
 
-  subtitulos: subtitulos as Caption[],
+// Versión de 1 minuto: solo las partes clave
+export const episodio2Corto: Guion = {
+  ...episodio2,
+  cortes: [
+    [0, 5.65], // "Hello… planeando mi boda en París con presupuesto real"
+    [12.9, 37.45], // el presupuesto: 5 mil dólares y las prioridades
+    [40.45, 56.45], // "tienes que tener un presupuesto real… TikTok, Pinterest"
+    [86.95, 91.4], // "siempre he preferido viajar… también es válido"
+    [94.6, 102.1], // "acompáñame al tercer vídeo…"
+  ],
 };
