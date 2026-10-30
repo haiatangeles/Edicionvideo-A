@@ -1,29 +1,29 @@
-import "@fontsource/anton/400.css";
-import "@fontsource/dancing-script/700.css";
-import "@fontsource/poppins/600.css";
-import "@fontsource/poppins/800.css";
-import "@fontsource/cormorant-garamond/700-italic.css";
-import "@fontsource/pinyon-script/400.css";
+import "@fontsource/inter/300.css";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
 
-// Paleta vintage: rosas de la Colour Palette + oro del marco
+// Estilo: elegante sin parecer producido, minimalista, cálido y cercano.
+// Tonos tierra suaves; el casi-negro solo para dar contraste al texto.
 export const colores = {
-  rosaClaro: "#FDE7EA",
-  rosa: "#E7B2B9",
-  oroRosa: "#B76E79", // texto sobre el marco crema
-  oro: "#C2A26B",
-  crema: "#FBF5EA",
+  crema: "#F7F2EA", // blanco crema
+  beige: "#E8DCCB", // beige cálido
+  arena: "#D8C8B4",
+  gris: "#BDB6AD", // gris suave
+  tierra: "#A3846B", // tono tierra
+  marron: "#6F5A49", // marrón neutro
+  tinta: "#2A2420", // contraste
   blanco: "#FFFFFF",
 };
 
-// Tipografía: Anton/Dancing/Poppins (borrador 11) + Cormorant/Pinyon en los banners
 export const fuentes = {
-  titulo: "Anton, Impact, sans-serif",
-  manuscrita: "'Dancing Script', cursive",
-  texto: "Poppins, Helvetica, sans-serif",
-  // Letras de los banners vintage (como el borrador 12)
-  vintage: "'Cormorant Garamond', Georgia, serif",
-  caligrafia: "'Pinyon Script', cursive",
+  texto: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
 };
 
-export const sombraSuave = "0 10px 30px rgba(150, 110, 90, 0.28)";
-export const halo = `0 0 14px ${colores.blanco}, 0 0 6px ${colores.blanco}, 0 0 2px ${colores.blanco}`;
+// Tarjeta crema translúcida con filete fino: el "banner" de todo el vídeo
+export const tarjeta = {
+  background: "rgba(247, 242, 234, 0.92)",
+  border: `1px solid rgba(111, 90, 73, 0.28)`,
+  borderRadius: 6,
+  boxShadow: "0 12px 30px rgba(42, 36, 32, 0.12)",
+} as const;

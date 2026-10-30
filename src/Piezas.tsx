@@ -2,199 +2,55 @@ import React from "react";
 import {
   AbsoluteFill,
   Easing,
-  Img,
   OffthreadVideo,
   interpolate,
-  spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { colores, fuentes, halo, sombraSuave } from "./estilo";
+import { colores, fuentes, tarjeta } from "./estilo";
 import { Previo } from "./guion";
 
-// Entrada con rebote y salida suave, relativa a la Sequence que lo contiene
-export const useEntradaSalida = (retrasoFrames = 0) => {
+// Aparece con un fundido suave y un pequeño deslizamiento (sin rebotes) y se desvanece al final
+export const useAparecer = (retrasoFrames = 0, desplazamiento = 16) => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
-  const entrada = spring({
-    frame: frame - retrasoFrames,
-    fps,
-    config: { damping: 11, stiffness: 140 },
-  });
+  const { durationInFrames } = useVideoConfig();
+  const entrada = interpolate(
+    frame,
+    [retrasoFrames, retrasoFrames + 12],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.cubic),
+    },
+  );
   const salida = interpolate(
     frame,
-    [durationInFrames - 8, durationInFrames],
+    [durationInFrames - 10, durationInFrames],
     [1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
-  return { entrada, salida, opacidad: Math.min(1, entrada * 1.5) * salida };
+  return {
+    opacity: entrada * salida,
+    transform: `translateY(${(1 - entrada) * desplazamiento}px)`,
+  };
 };
 
-// Estrellita que parpadea suavemente
-export const Destello: React.FC<{
-  x?: number;
-  derecha?: number;
-  y: number;
-  tamano?: number;
-  color?: string;
-  desfase?: number;
-}> = ({ x, derecha, y, tamano = 44, color = colores.oro, desfase = 0 }) => {
-  const frame = useCurrentFrame();
-  const s = 0.55 + 0.45 * Math.sin((frame + desfase) / 7);
-  return (
-    <svg
-      viewBox="-50 -50 100 100"
-      style={{
-        position: "absolute",
-        left: x,
-        right: derecha,
-        top: y,
-        width: tamano,
-        height: tamano,
-        transform: `scale(${s}) rotate(${frame * 1.5}deg)`,
-        filter: `drop-shadow(0 0 6px ${colores.blanco})`,
-      }}
-    >
-      <path
-        d="M0,-50 C6,-6 6,-6 50,0 C6,6 6,6 0,50 C-6,6 -6,6 -50,0 C-6,-6 -6,-6 0,-50Z"
-        fill={color}
-      />
-    </svg>
-  );
-};
-
-// Sticker de boda (public/stickers) que aparece girando y luego se mece un poco
-export const Sticker: React.FC<{
-  nombre: string;
-  ancho: number;
-  x?: number;
-  derecha?: number;
-  y: number;
-  giro?: number;
-  retraso?: number;
-}> = ({ nombre, ancho, x, derecha, y, giro = 0, retraso = 4 }) => {
-  const frame = useCurrentFrame();
-  const { entrada, salida } = useEntradaSalida(retraso);
-  const mecer = Math.sin((frame + ancho) / 22) * 4;
-  return (
-    <Img
-      src={staticFile(`stickers/${nombre}.png`)}
-      style={{
-        position: "absolute",
-        left: x,
-        right: derecha,
-        top: y,
-        width: ancho,
-        opacity: Math.min(1, entrada * 1.5) * salida,
-        transform: `scale(${entrada}) rotate(${giro + (1 - entrada) * -40 + mecer}deg)`,
-        filter: "drop-shadow(0 8px 14px rgba(120, 90, 70, 0.3))",
-        pointerEvents: "none",
-      }}
-    />
-  );
-};
-
-// Banner vintage: el marco dorado con rosas, siempre con su proporción original
-const PROPORCION_MARCO = 413 / 1076;
-
-export const BannerVintage: React.FC<{
+// Etiqueta pequeña en mayúsculas espaciadas (estilo editorial)
+export const Etiqueta: React.FC<{
   children: React.ReactNode;
-  ancho: number;
+  color?: string;
+  tamano?: number;
   style?: React.CSSProperties;
-}> = ({ children, ancho, style }) => (
+}> = ({ children, color = colores.marron, tamano = 26, style }) => (
   <div
     style={{
-      position: "relative",
-      width: ancho,
-      height: ancho * PROPORCION_MARCO,
-      padding: `0 ${ancho * 0.12}px`,
-      boxSizing: "border-box",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      textAlign: "center",
-      filter: "drop-shadow(0 10px 18px rgba(120, 90, 70, 0.3))",
-      ...style,
-    }}
-  >
-    <Img
-      src={staticFile("vintage/marco.png")}
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-    />
-    <div
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      {children}
-    </div>
-  </div>
-);
-
-// Títulos en Anton (mayúsculas) y textos de banner en Cormorant cursiva (borrador 12);
-// el tamaño se ajusta para que quepa en el ancho dado
-export const TextoVintage: React.FC<{
-  children: string;
-  tamano: number;
-  anchoMax?: number;
-  mayusculas?: boolean;
-  color?: string;
-  style?: React.CSSProperties;
-}> = ({
-  children,
-  tamano,
-  anchoMax,
-  mayusculas = false,
-  color = colores.oroRosa,
-  style,
-}) => {
-  const porLetra = mayusculas ? 0.5 : 0.46;
-  const ajustado = anchoMax
-    ? Math.min(tamano, anchoMax / (children.length * porLetra))
-    : tamano;
-  return (
-    <div
-      style={{
-        fontFamily: mayusculas ? fuentes.titulo : fuentes.vintage,
-        fontWeight: mayusculas ? 400 : 700,
-        fontStyle: mayusculas ? "normal" : "italic",
-        fontSize: ajustado,
-        lineHeight: 1.05,
-        letterSpacing: mayusculas ? 2 : 0,
-        textTransform: mayusculas ? "uppercase" : "none",
-        color,
-        ...style,
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
-export const Manuscrita: React.FC<{
-  children: React.ReactNode;
-  tamano?: number;
-  color?: string;
-  vintage?: boolean;
-  style?: React.CSSProperties;
-}> = ({
-  children,
-  tamano = 70,
-  color = colores.oroRosa,
-  vintage = false,
-  style,
-}) => (
-  <div
-    style={{
-      fontFamily: vintage ? fuentes.caligrafia : fuentes.manuscrita,
-      fontWeight: vintage ? 400 : 700,
+      fontFamily: fuentes.texto,
+      fontWeight: 500,
       fontSize: tamano,
-      lineHeight: 1.2,
+      letterSpacing: tamano * 0.28,
+      textTransform: "uppercase",
       color,
       ...style,
     }}
@@ -203,319 +59,254 @@ export const Manuscrita: React.FC<{
   </div>
 );
 
-// Filete dorado que se dibuja de izquierda a derecha
-const Subrayado: React.FC<{ progreso: number; ancho: number }> = ({
+// Título fino y amplio
+export const Titulo: React.FC<{
+  children: React.ReactNode;
+  tamano?: number;
+  color?: string;
+  style?: React.CSSProperties;
+}> = ({ children, tamano = 96, color = colores.tinta, style }) => (
+  <div
+    style={{
+      fontFamily: fuentes.texto,
+      fontWeight: 300,
+      fontSize: tamano,
+      lineHeight: 1.08,
+      letterSpacing: -tamano * 0.01,
+      color,
+      whiteSpace: "pre-line",
+      ...style,
+    }}
+  >
+    {children}
+  </div>
+);
+
+// Filete fino que se dibuja de izquierda a derecha
+const Filete: React.FC<{ progreso: number; ancho: number; color?: string }> = ({
   progreso,
   ancho,
-}) => {
-  const largo = ancho * 1.05;
-  return (
-    <svg
-      width={ancho}
-      height={34}
-      style={{ display: "block", margin: "0 auto" }}
-    >
-      <path
-        d={`M10 20 Q ${ancho / 2} 6 ${ancho - 10} 18`}
-        fill="none"
-        stroke={colores.oro}
-        strokeWidth={5}
-        strokeLinecap="round"
-        strokeDasharray={largo}
-        strokeDashoffset={largo * (1 - progreso)}
-      />
-    </svg>
-  );
-};
-
-export const FondoCuadricula: React.FC<{ style?: React.CSSProperties }> = ({
-  style,
+  color = colores.tierra,
 }) => (
-  <AbsoluteFill
+  <div
     style={{
-      backgroundColor: colores.rosa,
-      backgroundImage: `linear-gradient(${colores.blanco}55 2px, transparent 2px), linear-gradient(90deg, ${colores.blanco}55 2px, transparent 2px)`,
-      backgroundSize: "90px 90px",
-      ...style,
+      width: ancho * progreso,
+      height: 1.5,
+      background: color,
+      margin: "18px auto",
     }}
   />
 );
 
+// Tarjeta crema centrada arriba
+const Tarjeta: React.FC<{
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}> = ({ children, style }) => (
+  <div
+    style={{
+      ...tarjeta,
+      padding: "34px 56px",
+      textAlign: "center",
+      ...style,
+    }}
+  >
+    {children}
+  </div>
+);
+
+export const FondoIntro: React.FC<{ style?: React.CSSProperties }> = ({
+  style,
+}) => <AbsoluteFill style={{ backgroundColor: colores.beige, ...style }} />;
+
+const useFilete = (desde: number) => {
+  const frame = useCurrentFrame();
+  return interpolate(frame, [desde, desde + 18], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
+  });
+};
+
+// Primer clip: "planeando mi BODA EN PARÍS · ¿low cost?"
 export const Gancho: React.FC<{
   antes: string;
   titulo: string;
   pastilla: string;
 }> = ({ antes, titulo, pastilla }) => {
-  const a = useEntradaSalida(0);
-  const b = useEntradaSalida(5);
-  const c = useEntradaSalida(14);
-  const frame = useCurrentFrame();
-  const raya = interpolate(frame, [10, 26], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  const a = useAparecer(0);
+  const b = useAparecer(4);
+  const c = useAparecer(12);
+  const filete = useFilete(8);
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 110 }}>
-      <Manuscrita
-        tamano={84}
-        style={{
-          textShadow: halo,
-          opacity: a.opacidad,
-          transform: `translateY(${(1 - a.entrada) * 40}px) rotate(-4deg)`,
-        }}
-      >
-        {antes}
-      </Manuscrita>
-      <TextoVintage
-        tamano={132}
-        mayusculas
-        style={{
-          textShadow: halo,
-          opacity: b.opacidad,
-          transform: `scale(${0.6 + b.entrada * 0.4})`,
-        }}
-      >
-        {titulo}
-      </TextoVintage>
-      <div style={{ opacity: b.salida }}>
-        <Subrayado progreso={raya} ancho={720} />
-      </div>
-      <div
-        style={{
-          marginTop: 6,
-          opacity: c.opacidad,
-          transform: `scale(${c.entrada}) rotate(-3deg)`,
-        }}
-      >
-        <BannerVintage ancho={Math.max(440, pastilla.length * 32)}>
-          <TextoVintage tamano={60} style={{ whiteSpace: "nowrap" }}>
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 120 }}>
+      <Tarjeta style={{ padding: "40px 70px 44px" }}>
+        <div style={a}>
+          <Etiqueta>{antes}</Etiqueta>
+        </div>
+        <div style={b}>
+          <Titulo
+            tamano={92}
+            style={{
+              marginTop: 12,
+              textTransform: "uppercase",
+              letterSpacing: 6,
+            }}
+          >
+            {titulo}
+          </Titulo>
+        </div>
+        <Filete progreso={filete} ancho={420} />
+        <div style={c}>
+          <Titulo
+            tamano={44}
+            color={colores.marron}
+            style={{ fontWeight: 400 }}
+          >
             {pastilla}
-          </TextoVintage>
-        </BannerVintage>
-      </div>
-      <Sticker
-        nombre="tacones"
-        ancho={180}
-        derecha={30}
-        y={40}
-        giro={12}
-        retraso={10}
-      />
-      <Sticker
-        nombre="corazon"
-        ancho={130}
-        x={70}
-        y={470}
-        giro={-10}
-        retraso={16}
-      />
+          </Titulo>
+        </div>
+      </Tarjeta>
     </AbsoluteFill>
   );
 };
 
-// Título del episodio sobre fondo rosa cuadriculado, letras blancas
+// Intro del episodio sobre beige cálido
 export const TarjetaIntro: React.FC<{
   manuscrita: string;
   titulo: string;
   pastilla: string;
 }> = ({ manuscrita, titulo, pastilla }) => {
-  const a = useEntradaSalida(3);
-  const b = useEntradaSalida(12);
+  const a = useAparecer(4);
+  const b = useAparecer(8);
+  const c = useAparecer(14);
+  const filete = useFilete(10);
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 110 }}>
-      <Manuscrita
-        tamano={64}
-        color={colores.blanco}
-        style={{ opacity: a.opacidad }}
-      >
-        {manuscrita}
-      </Manuscrita>
-      <TextoVintage
-        tamano={140}
-        mayusculas
-        color={colores.blanco}
-        style={{
-          textShadow: `5px 5px 0 ${colores.oroRosa}`,
-          opacity: a.opacidad,
-          transform: `scale(${0.7 + a.entrada * 0.3})`,
-        }}
-      >
-        {titulo}
-      </TextoVintage>
-      <div
-        style={{
-          marginTop: 10,
-          marginLeft: 260,
-          opacity: b.opacidad,
-          transform: `scale(${b.entrada}) rotate(-4deg)`,
-          padding: "8px 22px 10px",
-          borderRadius: 999,
-          background: colores.oroRosa,
-          color: colores.blanco,
-          fontFamily: fuentes.texto,
-          fontWeight: 800,
-          fontSize: 34,
-          boxShadow: sombraSuave,
-        }}
-      >
-        {pastilla}
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 120 }}>
+      <div style={a}>
+        <Etiqueta>{manuscrita}</Etiqueta>
       </div>
-      <Sticker
-        nombre="cisnes"
-        ancho={230}
-        x={40}
-        y={1600}
-        giro={-6}
-        retraso={10}
-      />
-      <Destello derecha={110} y={470} tamano={50} color={colores.blanco} />
+      <div style={b}>
+        <Titulo
+          tamano={112}
+          style={{
+            marginTop: 14,
+            textTransform: "uppercase",
+            letterSpacing: 10,
+          }}
+        >
+          {titulo}
+        </Titulo>
+      </div>
+      <Filete progreso={filete} ancho={300} />
+      <div style={c}>
+        <Titulo tamano={36} color={colores.marron} style={{ fontWeight: 400 }}>
+          {pastilla}
+        </Titulo>
+      </div>
     </AbsoluteFill>
   );
 };
 
-const Avioncito: React.FC = () => (
-  <svg viewBox="0 0 100 100" width={130} height={130}>
+// Línea fina con un avión pequeño que cruza mientras dice "viajar"
+const Avion: React.FC = () => (
+  <svg viewBox="0 0 100 100" width={56} height={56}>
     <path
       d="M50 5 C54 5 56 10 56 16 L56 38 L92 58 L92 66 L56 55 L56 78 L68 87 L68 93 L50 88 L32 93 L32 87 L44 78 L44 55 L8 66 L8 58 L44 38 L44 16 C44 10 46 5 50 5Z"
       fill={colores.crema}
-      stroke={colores.oro}
-      strokeWidth={4}
+      stroke={colores.marron}
+      strokeWidth={3}
       strokeLinejoin="round"
     />
   </svg>
 );
 
-// Gancho de viajes + avión que cruza por arriba dejando una estela de puntitos
 export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
   antes,
   titulo,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const a = useEntradaSalida(0);
-  const b = useEntradaSalida(3);
-  const p = interpolate(frame, [2, 2 + 1.25 * fps], [0, 1], {
+  const a = useAparecer(0);
+  const b = useAparecer(4);
+  const visible = useAparecer(0, 0).opacity;
+  const p = interpolate(frame, [4, 4 + 2 * fps], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.cubic),
   });
+  // Arco suave por debajo de la tarjeta
   const ruta = (q: number) => ({
-    x: -150 + q * 1380,
-    y: 600 - Math.sin(q * Math.PI) * 180 - q * 60,
+    x: 90 + q * 900,
+    y: 560 - Math.sin(q * Math.PI) * 90,
   });
   const pos = ruta(p);
   const delante = ruta(Math.min(1, p + 0.01));
   const angulo =
     (Math.atan2(delante.y - pos.y, delante.x - pos.x) * 180) / Math.PI + 90;
-  const puntos = new Array(44)
+  const puntos = new Array(60)
     .fill(0)
-    .map((_, i) => i / 44)
-    .filter((q) => q < p - 0.04)
-    .map((q) => ruta(q));
-  const flotar = Math.sin(frame / 14) * 5;
+    .map((_, i) => ruta((i / 60) * p))
+    .map((d) => `${d.x},${d.y}`)
+    .join(" ");
   return (
     <AbsoluteFill>
       <svg
         width={1080}
         height={1920}
-        style={{ position: "absolute", opacity: a.salida }}
+        style={{ position: "absolute", opacity: visible }}
       >
-        {puntos.map((d, i) => (
-          <circle
-            key={i}
-            cx={d.x}
-            cy={d.y}
-            r={7}
-            fill={colores.crema}
-            stroke={colores.oro}
-            strokeWidth={3}
-          />
-        ))}
+        <polyline
+          points={puntos}
+          fill="none"
+          stroke={colores.crema}
+          strokeWidth={2.5}
+          strokeDasharray="2 10"
+          strokeLinecap="round"
+        />
       </svg>
-      {p > 0 && p < 1 ? (
+      {p > 0 ? (
         <div
           style={{
             position: "absolute",
-            left: pos.x - 65,
-            top: pos.y - 65,
+            left: pos.x - 28,
+            top: pos.y - 28,
+            opacity: visible,
             transform: `rotate(${angulo}deg)`,
           }}
         >
-          <Avioncito />
+          <Avion />
         </div>
       ) : null}
-      <AbsoluteFill style={{ alignItems: "center", paddingTop: 130 }}>
-        <Manuscrita
-          tamano={70}
-          vintage
-          style={{
-            textShadow: halo,
-            opacity: a.opacidad,
-            transform: `translateY(${(1 - a.entrada) * 30}px) rotate(-3deg)`,
-          }}
-        >
-          {antes}
-        </Manuscrita>
-        <div
-          style={{
-            position: "relative",
-            opacity: b.opacidad,
-            transform: `scale(${b.entrada}) rotate(-3deg) translateY(${flotar}px)`,
-          }}
-        >
-          <BannerVintage ancho={520}>
-            <TextoVintage tamano={96}>{titulo}</TextoVintage>
-          </BannerVintage>
-          <Sticker
-            nombre="auto"
-            ancho={220}
-            derecha={-190}
-            y={150}
-            giro={-4}
-            retraso={2}
-          />
-        </div>
+      <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
+        <Tarjeta>
+          <div style={a}>
+            <Etiqueta>{antes}</Etiqueta>
+          </div>
+          <div style={b}>
+            <Titulo tamano={100} style={{ marginTop: 10 }}>
+              {titulo}
+            </Titulo>
+          </div>
+        </Tarjeta>
       </AbsoluteFill>
     </AbsoluteFill>
   );
 };
 
-export const TituloDidactico: React.FC<{ texto: string; sticker: string }> = ({
+export const TituloDidactico: React.FC<{ texto: string; sticker?: string }> = ({
   texto,
-  sticker,
 }) => {
-  const frame = useCurrentFrame();
-  const { entrada, opacidad } = useEntradaSalida(0);
-  const flotar = Math.sin(frame / 14) * 5;
+  const estilo = useAparecer(0);
+  const largo = texto.length > 24;
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 130 }}>
-      <div
-        style={{
-          position: "relative",
-          opacity: opacidad,
-          transform: `translateY(${(1 - entrada) * -60 + flotar}px) rotate(-2deg)`,
-        }}
-      >
-        <BannerVintage ancho={780}>
-          {/* Los títulos largos pasan a dos líneas en vez de encogerse */}
-          {texto.length > 24 ? (
-            <TextoVintage tamano={72} style={{ whiteSpace: "pre-line" }}>
-              {texto}
-            </TextoVintage>
-          ) : (
-            <TextoVintage tamano={84} anchoMax={780 * 0.72}>
-              {texto}
-            </TextoVintage>
-          )}
-        </BannerVintage>
-        <Sticker
-          nombre={sticker}
-          ancho={170}
-          x={-110}
-          y={-50}
-          giro={-12}
-          retraso={3}
-        />
-        <Destello derecha={-20} y={-20} tamano={48} />
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
+      <div style={estilo}>
+        <Tarjeta style={{ maxWidth: 900 }}>
+          <Titulo tamano={largo ? 58 : 66} style={{ fontWeight: 400 }}>
+            {texto}
+          </Titulo>
+        </Tarjeta>
       </div>
     </AbsoluteFill>
   );
@@ -526,139 +317,82 @@ export const Lista: React.FC<{
   puntos: { texto: string; enFrames: number }[];
 }> = ({ titulo, puntos }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const { entrada, opacidad } = useEntradaSalida(0);
+  const estilo = useAparecer(0);
   return (
-    <div
-      style={{
-        position: "absolute",
-        right: 60,
-        top: 150,
-        width: 560,
-        padding: "26px 40px 34px",
-        background: colores.crema,
-        borderRadius: 18,
-        border: `3px solid ${colores.oro}`,
-        outline: `2px solid ${colores.oro}`,
-        outlineOffset: -14,
-        boxShadow: sombraSuave,
-        opacity: opacidad,
-        transform: `translateX(${(1 - entrada) * 300}px) rotate(2deg)`,
-      }}
+    <AbsoluteFill
+      style={{ alignItems: "flex-end", paddingTop: 140, paddingRight: 60 }}
     >
-      <Sticker
-        nombre="arco"
-        ancho={150}
-        derecha={-70}
-        y={-90}
-        giro={10}
-        retraso={6}
-      />
-      <Manuscrita tamano={66} vintage>
-        {titulo}
-      </Manuscrita>
-      {puntos.map((p, i) => {
-        const s = spring({
-          frame: frame - p.enFrames,
-          fps,
-          config: { damping: 12 },
-        });
-        return (
-          <div
-            key={p.texto}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 18,
-              marginTop: 14,
-              opacity: s,
-              transform: `translateX(${(1 - s) * 60}px)`,
-            }}
-          >
-            <span
-              style={{
-                width: 58,
-                height: 58,
-                borderRadius: 999,
-                background: colores.rosa,
-                border: `2px solid ${colores.oro}`,
-                color: colores.blanco,
-                fontFamily: fuentes.texto,
-                fontWeight: 800,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 32,
-                lineHeight: 1,
-                flexShrink: 0,
-              }}
-            >
-              {i + 1}
-            </span>
-            <TextoVintage tamano={50} style={{ whiteSpace: "nowrap" }}>
-              {p.texto}
-            </TextoVintage>
-          </div>
-        );
-      })}
-    </div>
+      <div
+        style={{ ...estilo, ...tarjeta, width: 560, padding: "34px 44px 26px" }}
+      >
+        <Etiqueta>{titulo.replace(":", "")}</Etiqueta>
+        {/* Cada prioridad entra cuando la nombra; la tarjeta crece con ella */}
+        {puntos
+          .filter((p) => frame >= p.enFrames)
+          .map((p, i) => {
+            const s = interpolate(
+              frame,
+              [p.enFrames, p.enFrames + 10],
+              [0, 1],
+              {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+                easing: Easing.out(Easing.cubic),
+              },
+            );
+            return (
+              <div
+                key={p.texto}
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 22,
+                  padding: "16px 0",
+                  borderTop:
+                    i === 0 ? undefined : "1px solid rgba(111, 90, 73, 0.18)",
+                  marginTop: i === 0 ? 14 : 0,
+                  opacity: s,
+                  transform: `translateX(${(1 - s) * 14}px)`,
+                  fontFamily: fuentes.texto,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 500,
+                    color: colores.tierra,
+                    letterSpacing: 2,
+                  }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span
+                  style={{
+                    fontSize: 42,
+                    fontWeight: 400,
+                    color: colores.tinta,
+                  }}
+                >
+                  {p.texto}
+                </span>
+              </div>
+            );
+          })}
+      </div>
+    </AbsoluteFill>
   );
 };
 
 export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
-  const frame = useCurrentFrame();
-  const { entrada, opacidad } = useEntradaSalida(0);
-  const letras = Math.floor(
-    interpolate(frame, [6, 36], [0, texto.length], {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    }),
-  );
-  const cursor = letras < texto.length || Math.floor(frame / 15) % 2 === 0;
+  const estilo = useAparecer(0);
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 110 }}>
-      <div
-        style={{
-          position: "relative",
-          opacity: opacidad,
-          transform: `scale(${0.7 + entrada * 0.3})`,
-        }}
-      >
-        <BannerVintage ancho={920}>
-          <div
-            style={{
-              fontFamily: fuentes.vintage,
-              fontWeight: 700,
-              fontStyle: "italic",
-              fontSize: 70,
-              lineHeight: 1.05,
-              color: colores.oroRosa,
-            }}
-          >
-            {texto.slice(0, letras)}
-            <span style={{ opacity: cursor ? 1 : 0, color: colores.oro }}>
-              |
-            </span>
-            {/* El resto ocupa su sitio sin verse, así el texto no salta */}
-            <span style={{ opacity: 0 }}>{texto.slice(letras)}</span>
-          </div>
-        </BannerVintage>
-        <Sticker
-          nombre="novia"
-          ancho={130}
-          x={-60}
-          y={160}
-          giro={-8}
-          retraso={8}
-        />
-        <Sticker
-          nombre="traje"
-          ancho={130}
-          derecha={-60}
-          y={160}
-          giro={8}
-          retraso={12}
-        />
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
+      <div style={estilo}>
+        <Tarjeta style={{ maxWidth: 900 }}>
+          <Titulo tamano={60} style={{ fontWeight: 400 }}>
+            {texto}
+          </Titulo>
+        </Tarjeta>
       </div>
     </AbsoluteFill>
   );
@@ -667,72 +401,71 @@ export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
 export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
   altoEnFrames,
 }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const { entrada, opacidad } = useEntradaSalida(0);
-  const alto = spring({
-    frame: frame - altoEnFrames,
-    fps,
-    config: { damping: 11 },
-  });
-  const tarjeta = (titulo: string, s: number, giro: number) => (
-    <div
-      style={{
-        transform: `scale(${s}) rotate(${giro}deg)`,
-        opacity: Math.min(1, s * 1.5),
-      }}
-    >
-      <BannerVintage ancho={430}>
-        <TextoVintage tamano={64}>{titulo}</TextoVintage>
-      </BannerVintage>
-    </div>
-  );
+  const bajo = useAparecer(0);
+  const alto = useAparecer(altoEnFrames);
+  const opciones: [string, React.CSSProperties][] = [
+    ["Low cost", bajo],
+    ["High cost", alto],
+  ];
   return (
-    <AbsoluteFill
-      style={{ paddingTop: 170, alignItems: "center", opacity: opacidad }}
-    >
-      <div
-        style={{
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-        }}
-      >
-        {tarjeta("Low cost", entrada, -3)}
-        <Manuscrita
-          tamano={80}
-          vintage
-          style={{ opacity: alto, textShadow: halo }}
-        >
-          vs
-        </Manuscrita>
-        {tarjeta("High cost", alto, 3)}
-        <Sticker
-          nombre="copas"
-          ancho={140}
-          x={380}
-          y={130}
-          giro={-6}
-          retraso={4}
-        />
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 160 }}>
+      <div style={{ display: "flex", gap: 24 }}>
+        {opciones.map(([texto, estilo]) => (
+          <div key={texto} style={estilo}>
+            <Tarjeta style={{ padding: "30px 44px" }}>
+              <Titulo tamano={60} style={{ fontWeight: 400 }}>
+                {texto}
+              </Titulo>
+            </Tarjeta>
+          </div>
+        ))}
       </div>
     </AbsoluteFill>
   );
 };
 
-const Dedo: React.FC = () => (
-  <svg viewBox="0 0 64 64" width={76} height={76}>
-    <path
-      d="M24 6c3 0 5 2 5 5v17l3-1c3-1 6 1 6 4v1l3-1c3-1 6 1 6 4v1l2-1c3 0 6 2 6 5v10c0 9-7 15-16 15h-6c-5 0-9-3-11-7L9 39c-2-3 0-7 4-7 2 0 3 1 5 3l1 2V11c0-3 2-5 5-5Z"
-      fill={colores.blanco}
-      stroke={colores.oroRosa}
-      strokeWidth={3}
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+// Cifra que sube de 0 a la cantidad justo cuando se dice
+export const Contador: React.FC<{
+  antes: string;
+  cantidad: number;
+  enFrames: number;
+  despues?: string;
+}> = ({ antes, cantidad, enFrames, despues }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const estilo = useAparecer(0);
+  const subir = interpolate(
+    frame,
+    [enFrames - 8, enFrames + 0.8 * fps],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.cubic),
+    },
+  );
+  const filete = useFilete(enFrames + Math.round(0.8 * fps));
+  const valor = Math.round(cantidad * subir).toLocaleString("en-US");
+  return (
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
+      <div style={estilo}>
+        <Tarjeta style={{ padding: "36px 80px 30px" }}>
+          <Etiqueta>{antes}</Etiqueta>
+          <Titulo
+            tamano={140}
+            style={{ marginTop: 8, fontVariantNumeric: "tabular-nums" }}
+          >
+            {`$${valor}`}
+          </Titulo>
+          <Filete progreso={filete} ancho={260} />
+          {despues ? <Etiqueta tamano={22}>{despues}</Etiqueta> : null}
+        </Tarjeta>
+      </div>
+    </AbsoluteFill>
+  );
+};
 
+// Cierre: "sígueme para el EPISODIO 03" y el botón que pasa a "Siguiendo"
 export const Cierre: React.FC<{
   titulo: string;
   destacado: string;
@@ -740,98 +473,42 @@ export const Cierre: React.FC<{
   botonPulsado: string;
 }> = ({ titulo, destacado, boton, botonPulsado }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const { entrada } = useEntradaSalida(0);
-  const toque = 32; // frame en que el dedo pulsa el botón
-  const llegada = spring({ frame: frame - 12, fps, config: { damping: 16 } });
-  const pulsado = frame >= toque;
-  const presion = interpolate(
-    frame,
-    [toque - 3, toque, toque + 5],
-    [1, 0.9, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-  );
-  const onda = interpolate(frame, [toque, toque + 18], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const salidaDedo = interpolate(frame, [toque + 10, toque + 22], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  const estilo = useAparecer(0);
+  const pulsado = frame >= 32; // coincide con el sonido del guion
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 50 }}>
-      <div
-        style={{
-          position: "relative",
-          transform: `translateY(${(1 - entrada) * -200}px)`,
-        }}
-      >
-        <BannerVintage ancho={820}>
-          <Manuscrita tamano={46}>{titulo}</Manuscrita>
-          <TextoVintage tamano={84} mayusculas>
+    <AbsoluteFill style={{ alignItems: "center", paddingTop: 90 }}>
+      <div style={estilo}>
+        <Tarjeta style={{ padding: "30px 60px 34px" }}>
+          <Etiqueta>{titulo}</Etiqueta>
+          <Titulo
+            tamano={72}
+            style={{
+              marginTop: 10,
+              textTransform: "uppercase",
+              letterSpacing: 8,
+            }}
+          >
             {destacado}
-          </TextoVintage>
-          <div style={{ position: "relative", marginTop: 8 }}>
-            {/* Onda del toque */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: 999,
-                border: `4px solid ${colores.oro}`,
-                transform: `scale(${1 + onda * 0.35})`,
-                opacity: onda > 0 ? 1 - onda : 0,
-              }}
-            />
-            <div
-              style={{
-                padding: "6px 30px 8px",
-                borderRadius: 999,
-                border: `2px solid ${colores.oro}`,
-                background: pulsado ? colores.crema : colores.rosa,
-                color: pulsado ? colores.oroRosa : colores.blanco,
-                fontFamily: fuentes.texto,
-                fontWeight: 800,
-                fontSize: 30,
-                transform: `scale(${presion})`,
-              }}
-            >
-              {pulsado ? botonPulsado : boton}
-            </div>
-            <div
-              style={{
-                position: "absolute",
-                left: "45%",
-                top: 22,
-                transform: `translate(${(1 - llegada) * 220 + salidaDedo * 160}px, ${(1 - llegada) * 200 + salidaDedo * 140}px) scale(${pulsado && frame < toque + 5 ? 0.9 : 1})`,
-                opacity: 1 - salidaDedo,
-              }}
-            >
-              <Dedo />
-            </div>
+          </Titulo>
+          <div
+            style={{
+              display: "inline-block",
+              marginTop: 22,
+              padding: "12px 40px",
+              borderRadius: 999,
+              border: `1px solid ${colores.marron}`,
+              background: pulsado ? colores.marron : "transparent",
+              color: pulsado ? colores.crema : colores.marron,
+              fontFamily: fuentes.texto,
+              fontWeight: 500,
+              fontSize: 28,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+            }}
+          >
+            {pulsado ? botonPulsado : boton}
           </div>
-        </BannerVintage>
-        <Sticker
-          nombre="corazon"
-          ancho={110}
-          x={-40}
-          y={200}
-          giro={-12}
-          retraso={6}
-        />
-        {pulsado ? (
-          <>
-            <Destello derecha={40} y={10} tamano={44} />
-            <Destello
-              x={90}
-              y={240}
-              tamano={30}
-              color={colores.rosa}
-              desfase={15}
-            />
-          </>
-        ) : null}
+        </Tarjeta>
       </div>
     </AbsoluteFill>
   );
@@ -847,104 +524,27 @@ export const BarraProgreso: React.FC = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        height: 14,
-        background: "rgba(255,255,255,0.5)",
+        height: 6,
+        background: "rgba(247, 242, 234, 0.45)",
       }}
     >
       <div
         style={{
           height: "100%",
           width: `${(frame / (durationInFrames - 1)) * 100}%`,
-          background: `linear-gradient(90deg, ${colores.rosa}, ${colores.oro})`,
+          background: colores.tierra,
         }}
       />
     </div>
   );
 };
 
-// Cifra que sube de 0 a la cantidad justo cuando se dice, dentro del banner vintage
-export const Contador: React.FC<{
-  antes: string;
-  cantidad: number;
-  enFrames: number;
-  despues?: string;
-}> = ({ antes, cantidad, enFrames, despues }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const { entrada, opacidad } = useEntradaSalida(0);
-  const subir = interpolate(
-    frame,
-    [enFrames - 8, enFrames + 0.8 * fps],
-    [0, 1],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
-    },
-  );
-  const latido = spring({
-    frame: frame - (enFrames + Math.round(0.8 * fps)),
-    fps,
-    config: { damping: 8 },
-  });
-  const valor = Math.round(cantidad * subir).toLocaleString("en-US");
-  return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 110 }}>
-      <div
-        style={{
-          position: "relative",
-          opacity: opacidad,
-          transform: `scale(${(0.7 + entrada * 0.3) * (1 + (subir === 1 ? (1 - latido) * 0.08 : 0))}) rotate(-2deg)`,
-        }}
-      >
-        <BannerVintage ancho={780}>
-          <Manuscrita tamano={52} vintage>
-            {antes}
-          </Manuscrita>
-          <TextoVintage tamano={124} mayusculas>
-            {`$${valor}`}
-          </TextoVintage>
-          {despues ? <TextoVintage tamano={40}>{despues}</TextoVintage> : null}
-        </BannerVintage>
-        <Sticker
-          nombre="anillos"
-          ancho={150}
-          derecha={-60}
-          y={-50}
-          giro={14}
-          retraso={4}
-        />
-        {subir === 1 ? (
-          <>
-            <Destello x={30} y={-20} tamano={56} />
-            <Destello
-              derecha={110}
-              y={250}
-              tamano={40}
-              color={colores.rosa}
-              desfase={10}
-            />
-          </>
-        ) : null}
-      </div>
-    </AbsoluteFill>
-  );
-};
-
 // Gancho visual: el resultado final de la boda con el texto desde el primer segundo
 export const GanchoPrevio: React.FC<{ previo: Previo }> = ({ previo }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  // Entrada muy rápida: el texto se lee ya en el primer segundo
-  const rapida = (retraso: number) =>
-    spring({
-      frame: frame - retraso,
-      fps,
-      config: { damping: 14, stiffness: 260 },
-    });
-  const a = rapida(0);
-  const b = rapida(3);
-  const c = rapida(7);
+  const a = useAparecer(0, 10);
+  const b = useAparecer(3, 10);
+  const c = useAparecer(8, 10);
+  const filete = useFilete(5);
   return (
     <AbsoluteFill>
       <OffthreadVideo
@@ -952,56 +552,38 @@ export const GanchoPrevio: React.FC<{ previo: Previo }> = ({ previo }) => {
         muted
         style={{ width: "100%", height: "100%", objectFit: "cover" }}
       />
-      {/* Degradado suave arriba para que el texto se lea sobre cualquier toma */}
+      {/* Velo oscuro suave arriba: texto crema legible sobre cualquier toma */}
       <AbsoluteFill
         style={{
           background:
-            "linear-gradient(180deg, rgba(255,250,245,0.55) 0%, rgba(255,250,245,0) 38%)",
+            "linear-gradient(180deg, rgba(42,36,32,0.55) 0%, rgba(42,36,32,0.25) 30%, rgba(42,36,32,0) 48%)",
         }}
       />
-      <AbsoluteFill style={{ alignItems: "center", paddingTop: 60 }}>
-        <Manuscrita
-          tamano={70}
-          style={{
-            textShadow: halo,
-            opacity: a,
-            transform: `translateY(${(1 - a) * 30}px) rotate(-4deg)`,
-          }}
-        >
-          {previo.antes}
-        </Manuscrita>
-        <TextoVintage
-          tamano={112}
-          mayusculas
-          style={{
-            textShadow: halo,
-            opacity: b,
-            transform: `scale(${0.7 + b * 0.3})`,
-          }}
-        >
-          {previo.titulo}
-        </TextoVintage>
-        <div
-          style={{
-            marginTop: 4,
-            opacity: c,
-            transform: `scale(${c}) rotate(-2deg)`,
-          }}
-        >
-          <BannerVintage ancho={Math.max(400, previo.banner.length * 25)}>
-            <TextoVintage tamano={50} style={{ whiteSpace: "nowrap" }}>
-              {previo.banner}
-            </TextoVintage>
-          </BannerVintage>
+      <AbsoluteFill style={{ alignItems: "center", paddingTop: 130 }}>
+        <div style={a}>
+          <Etiqueta color={colores.beige} tamano={28}>
+            {previo.antes}
+          </Etiqueta>
         </div>
-        <Destello x={130} y={140} tamano={54} />
-        <Destello
-          derecha={120}
-          y={330}
-          tamano={40}
-          color={colores.blanco}
-          desfase={10}
-        />
+        <div style={b}>
+          <Titulo
+            tamano={104}
+            color={colores.crema}
+            style={{
+              marginTop: 14,
+              textTransform: "uppercase",
+              letterSpacing: 8,
+            }}
+          >
+            {previo.titulo}
+          </Titulo>
+        </div>
+        <Filete progreso={filete} ancho={340} color={colores.beige} />
+        <div style={c}>
+          <Titulo tamano={44} color={colores.crema} style={{ fontWeight: 400 }}>
+            {previo.banner}
+          </Titulo>
+        </div>
       </AbsoluteFill>
     </AbsoluteFill>
   );

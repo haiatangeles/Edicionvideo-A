@@ -16,7 +16,7 @@ import {
   Cierre,
   Comparativa,
   Contador,
-  FondoCuadricula,
+  FondoIntro,
   Gancho,
   GanchoPrevio,
   Lista,
@@ -64,19 +64,19 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colores.crema }}>
-      <FondoCuadricula style={{ opacity: tarjeta }} />
+      <FondoIntro style={{ opacity: tarjeta }} />
       <AbsoluteFill
         style={{
-          transform: `translateY(${tarjeta * 190}px) scale(${escalaVideo}) rotate(${tarjeta * -2}deg)`,
+          transform: `translateY(${tarjeta * 190}px) scale(${escalaVideo})`,
           transformOrigin: "50% 38%",
           border:
             tarjeta > 0
-              ? `${tarjeta * 22}px solid ${colores.blanco}`
+              ? `${tarjeta * 12}px solid ${colores.crema}`
               : undefined,
-          borderRadius: tarjeta * 40,
+          borderRadius: tarjeta * 12,
           overflow: "hidden",
           boxShadow:
-            tarjeta > 0 ? "0 30px 60px rgba(120,90,70,0.35)" : undefined,
+            tarjeta > 0 ? "0 24px 50px rgba(42,36,32,0.18)" : undefined,
         }}
       >
         {/* Vídeo original, sin filtros ni zoom; cada tramo que se queda va seguido del anterior */}
@@ -223,7 +223,7 @@ export const EpisodioCompleto: React.FC<{ guion: Guion }> = ({ guion }) => {
     <AbsoluteFill style={{ backgroundColor: colores.crema }}>
       <Sequence name="Gancho previo" durationInFrames={n}>
         <GanchoPrevio previo={previo} />
-        <Html5Audio src={staticFile("sfx/brillos.wav")} volume={0.45} />
+        <Html5Audio src={staticFile("sfx/brillos.wav")} volume={0.3} />
       </Sequence>
       <Sequence
         name="Transición"
