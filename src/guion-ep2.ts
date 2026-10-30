@@ -2,6 +2,14 @@ import { Guion } from "./guion";
 
 // Episodio 02: el presupuesto real (tiempos sacados de la transcripción con Whisper)
 export const episodio2: Guion = {
+  // Consejo de Instagram: abrir con el resultado final y un texto en los primeros segundos
+  previo: {
+    video: "episodio-2-gancho.mp4",
+    duracionSeg: 4.65,
+    antes: "mi boda estilo",
+    titulo: "VOGUE EN PARÍS",
+    banner: "sin gastar una fortuna",
+  },
   video: "episodio-2.mp4",
   duracionSeg: 107.4,
 

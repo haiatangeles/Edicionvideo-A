@@ -1,6 +1,6 @@
 import { Composition } from "remotion";
-import { BodaParis } from "./BodaParis";
-import { duracionSalida, episodio1, Guion } from "./guion";
+import { EpisodioCompleto } from "./BodaParis";
+import { duracionTotal, episodio1, Guion } from "./guion";
 import { episodio2, episodio2Corto } from "./guion-ep2";
 
 const episodios: [string, Guion][] = [
@@ -16,8 +16,8 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           key={id}
           id={id}
-          component={BodaParis}
-          durationInFrames={Math.floor(duracionSalida(guion) * 30)}
+          component={EpisodioCompleto}
+          durationInFrames={Math.floor(duracionTotal(guion) * 30)}
           fps={30}
           width={1080}
           height={1920}

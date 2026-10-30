@@ -3,7 +3,17 @@
 
 type Tramo = { desde: number; hasta: number };
 
+// Gancho visual antes del vídeo principal (el resultado final primero)
+export type Previo = {
+  video: string;
+  duracionSeg: number;
+  antes: string; // texto pequeño en manuscrita
+  titulo: string; // texto grande
+  banner: string; // texto del banner vintage
+};
+
 export type Guion = {
+  previo?: Previo;
   video: string;
   duracionSeg: number;
   gancho: { hasta: number; antes: string; titulo: string; pastilla: string };
@@ -38,6 +48,10 @@ export const duracionSalida = (guion: Guion) =>
     (t, [a, b]) => t + b - a,
     0,
   );
+
+// Duración total, con el gancho previo si lo hay
+export const duracionTotal = (guion: Guion) =>
+  (guion.previo?.duracionSeg ?? 0) + duracionSalida(guion);
 
 // Pasa un tiempo del vídeo original al vídeo editado (lo cortado se "pega" al siguiente tramo)
 export const tiempoSalida = (guion: Guion, t: number) => {

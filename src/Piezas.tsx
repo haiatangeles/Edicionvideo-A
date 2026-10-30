@@ -3,6 +3,7 @@ import {
   AbsoluteFill,
   Easing,
   Img,
+  OffthreadVideo,
   interpolate,
   spring,
   staticFile,
@@ -10,6 +11,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { colores, fuentes, halo, sombraSuave } from "./estilo";
+import { Previo } from "./guion";
 
 // Entrada con rebote y salida suave, relativa a la Sequence que lo contiene
 export const useEntradaSalida = (retrasoFrames = 0) => {
@@ -925,6 +927,82 @@ export const Contador: React.FC<{
           </>
         ) : null}
       </div>
+    </AbsoluteFill>
+  );
+};
+
+// Gancho visual: el resultado final de la boda con el texto desde el primer segundo
+export const GanchoPrevio: React.FC<{ previo: Previo }> = ({ previo }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  // Entrada muy rápida: el texto se lee ya en el primer segundo
+  const rapida = (retraso: number) =>
+    spring({
+      frame: frame - retraso,
+      fps,
+      config: { damping: 14, stiffness: 260 },
+    });
+  const a = rapida(0);
+  const b = rapida(3);
+  const c = rapida(7);
+  return (
+    <AbsoluteFill>
+      <OffthreadVideo
+        src={staticFile(previo.video)}
+        muted
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
+      {/* Degradado suave arriba para que el texto se lea sobre cualquier toma */}
+      <AbsoluteFill
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(255,250,245,0.55) 0%, rgba(255,250,245,0) 38%)",
+        }}
+      />
+      <AbsoluteFill style={{ alignItems: "center", paddingTop: 60 }}>
+        <Manuscrita
+          tamano={70}
+          style={{
+            textShadow: halo,
+            opacity: a,
+            transform: `translateY(${(1 - a) * 30}px) rotate(-4deg)`,
+          }}
+        >
+          {previo.antes}
+        </Manuscrita>
+        <TextoVintage
+          tamano={112}
+          mayusculas
+          style={{
+            textShadow: halo,
+            opacity: b,
+            transform: `scale(${0.7 + b * 0.3})`,
+          }}
+        >
+          {previo.titulo}
+        </TextoVintage>
+        <div
+          style={{
+            marginTop: 4,
+            opacity: c,
+            transform: `scale(${c}) rotate(-2deg)`,
+          }}
+        >
+          <BannerVintage ancho={Math.max(400, previo.banner.length * 25)}>
+            <TextoVintage tamano={50} style={{ whiteSpace: "nowrap" }}>
+              {previo.banner}
+            </TextoVintage>
+          </BannerVintage>
+        </div>
+        <Destello x={130} y={140} tamano={54} />
+        <Destello
+          derecha={120}
+          y={330}
+          tamano={40}
+          color={colores.blanco}
+          desfase={10}
+        />
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };

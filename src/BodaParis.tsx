@@ -18,6 +18,7 @@ import {
   Contador,
   FondoCuadricula,
   Gancho,
+  GanchoPrevio,
   Lista,
   Pregunta,
   TarjetaIntro,
@@ -206,6 +207,34 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
           />
         </Sequence>
       ))}
+    </AbsoluteFill>
+  );
+};
+
+// Episodio con el gancho visual delante (si lo tiene) y después el vídeo principal
+export const EpisodioCompleto: React.FC<{ guion: Guion }> = ({ guion }) => {
+  const { fps } = useVideoConfig();
+  const { previo } = guion;
+  if (!previo) {
+    return <BodaParis guion={guion} />;
+  }
+  const n = Math.round(previo.duracionSeg * fps);
+  return (
+    <AbsoluteFill style={{ backgroundColor: colores.crema }}>
+      <Sequence name="Gancho previo" durationInFrames={n}>
+        <GanchoPrevio previo={previo} />
+        <Html5Audio src={staticFile("sfx/brillos.wav")} volume={0.45} />
+      </Sequence>
+      <Sequence
+        name="Transición"
+        from={n - 6}
+        durationInFrames={Math.round(fps)}
+      >
+        <Html5Audio src={staticFile("sfx/whoosh.wav")} volume={0.35} />
+      </Sequence>
+      <Sequence name="Episodio" from={n}>
+        <BodaParis guion={guion} />
+      </Sequence>
     </AbsoluteFill>
   );
 };
