@@ -147,7 +147,48 @@ export const Titulo: React.FC<{
   </div>
 );
 
-// Bloque de título sobre el vídeo: etiqueta + título que se revela + línea en cursiva
+// Banner elegante: panel tierra translúcido con desenfoque y un filete crema por dentro.
+// Se abre desde el centro y el filete aparece justo después.
+export const Banner: React.FC<{
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}> = ({ children, style }) => {
+  const frame = useCurrentFrame();
+  const salida = useSalida();
+  const abrir = interpolate(frame, [0, 14], [0, 1], suave);
+  const filete = interpolate(frame, [8, 22], [0, 1], suave);
+  return (
+    <div
+      style={{
+        position: "relative",
+        padding: "34px 64px 36px",
+        background: "rgba(58, 47, 39, 0.42)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        borderRadius: 3,
+        boxShadow: "0 18px 40px rgba(42, 36, 32, 0.22)",
+        clipPath: `inset(0 ${(1 - abrir) * 50}% 0 ${(1 - abrir) * 50}%)`,
+        opacity: salida,
+        transform: `translateY(${(1 - salida) * -10}px)`,
+        ...style,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 10,
+          border: "1px solid rgba(247, 242, 234, 0.6)",
+          borderRadius: 2,
+          opacity: filete,
+          transform: `scale(${0.985 + filete * 0.015})`,
+        }}
+      />
+      <div style={{ position: "relative" }}>{children}</div>
+    </div>
+  );
+};
+
+// Bloque de título: etiqueta + título que se revela + línea en cursiva (opcionalmente dentro de un banner)
 const Bloque: React.FC<{
   etiqueta?: string;
   titulo: string;
@@ -156,6 +197,9 @@ const Bloque: React.FC<{
   color?: string;
   sombra?: boolean;
   paddingTop?: number;
+  banner?: boolean;
+  mayusculas?: boolean;
+  children?: React.ReactNode;
 }> = ({
   etiqueta,
   titulo,
@@ -164,29 +208,38 @@ const Bloque: React.FC<{
   color = colores.crema,
   sombra = true,
   paddingTop = 150,
+  banner = false,
+  mayusculas = false,
+  children,
 }) => {
-  const a = useAparecer(0, 10);
+  const frame = useCurrentFrame();
+  const a = useAparecer(banner ? 6 : 0, 10);
   const salida = useSalida();
-  const c = useAparecer(6 + titulo.split(" ").length * 4, 10);
-  return (
-    <AbsoluteFill
-      style={{
-        alignItems: "center",
-        paddingTop,
-        textAlign: "center",
-        textShadow: sombra ? sombraTexto : "none",
-      }}
-    >
+  const c = useAparecer(10 + titulo.split(" ").length * 4, 10);
+  // Mayúsculas: las letras llegan separadas y se juntan (como una portada de revista)
+  const espaciado = mayusculas
+    ? interpolate(frame, [0, 26], [0.32, 0.06], suave) * tamano
+    : -tamano * 0.012;
+  const contenido = (
+    <>
       {etiqueta ? (
         <div style={a}>
-          <Etiqueta color={color} style={{ marginBottom: 18 }}>
+          <Etiqueta
+            color={color}
+            tamano={banner ? 22 : 28}
+            style={{ marginBottom: banner ? 12 : 18 }}
+          >
             {etiqueta}
           </Etiqueta>
         </div>
       ) : null}
-      <div style={{ opacity: salida }}>
-        <Titulo tamano={tamano} color={color}>
-          <Revelar texto={titulo} retraso={4} />
+      <div style={{ opacity: banner ? 1 : salida }}>
+        <Titulo
+          tamano={tamano}
+          color={color}
+          style={{ letterSpacing: espaciado }}
+        >
+          <Revelar texto={titulo} retraso={banner ? 8 : 4} />
         </Titulo>
       </div>
       {pie ? (
@@ -201,6 +254,23 @@ const Bloque: React.FC<{
           </Titulo>
         </div>
       ) : null}
+      {children}
+    </>
+  );
+  return (
+    <AbsoluteFill
+      style={{
+        alignItems: "center",
+        paddingTop,
+        textAlign: "center",
+        textShadow: sombra && !banner ? sombraTexto : "none",
+      }}
+    >
+      {banner ? (
+        <Banner style={{ maxWidth: 940 }}>{contenido}</Banner>
+      ) : (
+        contenido
+      )}
     </AbsoluteFill>
   );
 };
@@ -219,12 +289,10 @@ export const Gancho: React.FC<{
     <Velo />
     <Bloque
       etiqueta={antes}
-      titulo={titulo
-        .toLowerCase()
-        .replace(/(^|\s)\S/g, (l) => l.toUpperCase())
-        .replace(" En ", " en ")}
-      tamano={128}
+      titulo={titulo}
+      tamano={112}
       pie={pastilla}
+      mayusculas
     />
   </AbsoluteFill>
 );
@@ -286,7 +354,6 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
     .join(" ");
   return (
     <AbsoluteFill>
-      <Velo />
       <svg
         width={1080}
         height={1920}
@@ -314,7 +381,13 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
           <Avion />
         </div>
       ) : null}
-      <Bloque etiqueta={antes} titulo={titulo} tamano={150} />
+      <Bloque
+        etiqueta={antes}
+        titulo={titulo}
+        tamano={96}
+        banner
+        paddingTop={140}
+      />
     </AbsoluteFill>
   );
 };
@@ -323,8 +396,12 @@ export const TituloDidactico: React.FC<{ texto: string; sticker?: string }> = ({
   texto,
 }) => (
   <AbsoluteFill>
-    <Velo />
-    <Bloque titulo={texto} tamano={texto.length > 24 ? 92 : 118} />
+    <Bloque
+      titulo={texto}
+      tamano={texto.length > 24 ? 62 : 78}
+      banner
+      paddingTop={150}
+    />
   </AbsoluteFill>
 );
 
@@ -336,58 +413,55 @@ export const Lista: React.FC<{
   const salida = useSalida();
   const a = useAparecer(0, 10);
   return (
-    <AbsoluteFill>
-      <Velo alto={55} />
-      <AbsoluteFill
-        style={{
-          paddingTop: 140,
-          paddingLeft: 90,
-          textShadow: sombraTexto,
-          opacity: salida,
-        }}
+    <AbsoluteFill
+      style={{ alignItems: "flex-end", paddingTop: 140, paddingRight: 60 }}
+    >
+      <Banner
+        style={{ width: 600, padding: "34px 50px 30px", opacity: salida }}
       >
         <div style={a}>
-          <Etiqueta style={{ marginBottom: 20 }}>
+          <Etiqueta tamano={24} style={{ marginBottom: 14 }}>
             {titulo.replace(":", "")}
           </Etiqueta>
         </div>
         {/* Cada prioridad entra cuando la nombra */}
-        {puntos.map((p, i) => {
-          const s = interpolate(
-            frame,
-            [p.enFrames, p.enFrames + 14],
-            [0, 1],
-            suave,
-          );
-          return (
-            <div
-              key={p.texto}
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 26,
-                marginTop: 6,
-                opacity: s,
-                transform: `translateX(${(1 - s) * -24}px)`,
-                filter: `blur(${(1 - s) * 6}px)`,
-              }}
-            >
-              <Titulo tamano={46} cursiva color={colores.beige}>
-                {String(i + 1).padStart(2, "0")}
-              </Titulo>
-              <Titulo tamano={76}>{p.texto}</Titulo>
-            </div>
-          );
-        })}
-      </AbsoluteFill>
+        {puntos
+          .filter((p) => frame >= p.enFrames)
+          .map((p, i) => {
+            const s = interpolate(
+              frame,
+              [p.enFrames, p.enFrames + 14],
+              [0, 1],
+              suave,
+            );
+            return (
+              <div
+                key={p.texto}
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 26,
+                  marginTop: 6,
+                  opacity: s,
+                  transform: `translateX(${(1 - s) * -24}px)`,
+                  filter: `blur(${(1 - s) * 6}px)`,
+                }}
+              >
+                <Titulo tamano={34} cursiva color={colores.beige}>
+                  {String(i + 1).padStart(2, "0")}
+                </Titulo>
+                <Titulo tamano={54}>{p.texto}</Titulo>
+              </div>
+            );
+          })}
+      </Banner>
     </AbsoluteFill>
   );
 };
 
 export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => (
   <AbsoluteFill>
-    <Velo />
-    <Bloque titulo={texto} tamano={96} />
+    <Bloque titulo={texto} tamano={66} banner />
   </AbsoluteFill>
 );
 
@@ -398,27 +472,22 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
   const alto = useAparecer(altoEnFrames);
   return (
     <AbsoluteFill>
-      <Velo />
-      <AbsoluteFill
-        style={{
-          alignItems: "center",
-          paddingTop: 170,
-          textShadow: sombraTexto,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "baseline", gap: 30 }}>
-          <div style={bajo}>
-            <Titulo tamano={100}>Low cost</Titulo>
+      <AbsoluteFill style={{ alignItems: "center", paddingTop: 170 }}>
+        <Banner>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 30 }}>
+            <div style={bajo}>
+              <Titulo tamano={72}>Low cost</Titulo>
+            </div>
+            <div style={alto}>
+              <Titulo tamano={56} cursiva color={colores.beige}>
+                vs
+              </Titulo>
+            </div>
+            <div style={alto}>
+              <Titulo tamano={72}>High cost</Titulo>
+            </div>
           </div>
-          <div style={alto}>
-            <Titulo tamano={56} cursiva color={colores.beige}>
-              vs
-            </Titulo>
-          </div>
-          <div style={alto}>
-            <Titulo tamano={100}>High cost</Titulo>
-          </div>
-        </div>
+        </Banner>
       </AbsoluteFill>
     </AbsoluteFill>
   );
@@ -451,27 +520,24 @@ export const Contador: React.FC<{
   const valor = Math.round(cantidad * subir).toLocaleString("en-US");
   return (
     <AbsoluteFill>
-      <Velo />
-      <AbsoluteFill
-        style={{
-          alignItems: "center",
-          paddingTop: 150,
-          textShadow: sombraTexto,
-        }}
-      >
-        <div style={a}>
-          <Etiqueta style={{ marginBottom: 14 }}>{antes}</Etiqueta>
-        </div>
-        <div style={{ ...b, transform: `${b.transform} scale(${latido})` }}>
-          <Titulo tamano={200} style={{ fontVariantNumeric: "tabular-nums" }}>
-            {`$${valor}`}
-          </Titulo>
-        </div>
-        {despues ? (
-          <Titulo tamano={52} cursiva style={{ marginTop: 10 }}>
-            {despues}
-          </Titulo>
-        ) : null}
+      <AbsoluteFill style={{ alignItems: "center", paddingTop: 150 }}>
+        <Banner style={{ padding: "34px 90px 30px", textAlign: "center" }}>
+          <div style={a}>
+            <Etiqueta tamano={24} style={{ marginBottom: 10 }}>
+              {antes}
+            </Etiqueta>
+          </div>
+          <div style={{ ...b, transform: `${b.transform} scale(${latido})` }}>
+            <Titulo tamano={150} style={{ fontVariantNumeric: "tabular-nums" }}>
+              {`$${valor}`}
+            </Titulo>
+          </div>
+          {despues ? (
+            <Titulo tamano={52} cursiva style={{ marginTop: 10 }}>
+              {despues}
+            </Titulo>
+          ) : null}
+        </Banner>
       </AbsoluteFill>
     </AbsoluteFill>
   );
@@ -488,34 +554,33 @@ export const Cierre: React.FC<{
   const c = useAparecer(14, 10);
   const pulsado = frame >= 32; // coincide con el sonido del guion
   return (
-    <AbsoluteFill>
-      <Velo />
-      <Bloque
-        etiqueta={titulo}
-        titulo={destacado.charAt(0) + destacado.slice(1).toLowerCase()}
-        tamano={130}
-        paddingTop={120}
-      />
-      <AbsoluteFill style={{ alignItems: "center", paddingTop: 390 }}>
-        <div
-          style={{
-            ...c,
-            padding: "14px 46px",
-            borderRadius: 999,
-            border: `1.5px solid ${colores.crema}`,
-            background: pulsado ? colores.crema : "rgba(42,36,32,0.15)",
-            color: pulsado ? colores.marron : colores.crema,
-            fontFamily: fuentes.texto,
-            fontWeight: 500,
-            fontSize: 28,
-            letterSpacing: 4,
-            textTransform: "uppercase",
-          }}
-        >
-          {pulsado ? botonPulsado : boton}
-        </div>
-      </AbsoluteFill>
-    </AbsoluteFill>
+    <Bloque
+      etiqueta={titulo}
+      titulo={destacado.charAt(0) + destacado.slice(1).toLowerCase()}
+      tamano={92}
+      paddingTop={110}
+      banner
+    >
+      <div
+        style={{
+          ...c,
+          display: "inline-block",
+          marginTop: 22,
+          padding: "12px 40px",
+          borderRadius: 999,
+          border: `1.5px solid ${colores.crema}`,
+          background: pulsado ? colores.crema : "rgba(42,36,32,0.15)",
+          color: pulsado ? colores.marron : colores.crema,
+          fontFamily: fuentes.texto,
+          fontWeight: 500,
+          fontSize: 24,
+          letterSpacing: 4,
+          textTransform: "uppercase",
+        }}
+      >
+        {pulsado ? botonPulsado : boton}
+      </div>
+    </Bloque>
   );
 };
 
@@ -555,11 +620,9 @@ export const GanchoPrevio: React.FC<{ previo: Previo }> = ({ previo }) => (
     <Velo alto={50} />
     <Bloque
       etiqueta={previo.antes}
-      titulo={previo.titulo
-        .toLowerCase()
-        .replace(/(^|\s)\S/g, (l) => l.toUpperCase())
-        .replace(" En ", " en ")}
-      tamano={136}
+      titulo={previo.titulo}
+      tamano={118}
+      mayusculas
       pie={previo.banner}
       paddingTop={120}
     />
