@@ -1,10 +1,11 @@
-import "@fontsource/inter/300.css";
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/500.css";
-import "@fontsource/inter/600.css";
+import "@fontsource/dm-serif-display/400.css";
+import "@fontsource/dm-serif-display/400-italic.css";
+import "@fontsource/montserrat/300.css";
+import "@fontsource/montserrat/400.css";
+import "@fontsource/montserrat/500.css";
 
-// Estilo: elegante sin parecer producido, minimalista, cálido y cercano.
-// Tonos tierra suaves; el casi-negro solo para dar contraste al texto.
+// Estilo: elegante sin parecer producido, cálido y con emoción.
+// Tonos tierra suaves; el casi-negro solo para dar contraste.
 export const colores = {
   crema: "#F7F2EA", // blanco crema
   beige: "#E8DCCB", // beige cálido
@@ -16,14 +17,12 @@ export const colores = {
   blanco: "#FFFFFF",
 };
 
+// Serif de alto contraste para los títulos (como "Birthday vlog") + sans fina en mayúsculas
 export const fuentes = {
-  texto: "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+  titulo: "'DM Serif Display', Georgia, serif",
+  texto: "Montserrat, 'Helvetica Neue', Helvetica, Arial, sans-serif",
 };
 
-// Tarjeta crema translúcida con filete fino: el "banner" de todo el vídeo
-export const tarjeta = {
-  background: "rgba(247, 242, 234, 0.92)",
-  border: `1px solid rgba(111, 90, 73, 0.28)`,
-  borderRadius: 6,
-  boxShadow: "0 12px 30px rgba(42, 36, 32, 0.12)",
-} as const;
+// Sombra suave para que el texto crema se lea sobre el vídeo
+export const sombraTexto =
+  "0 2px 18px rgba(42, 36, 32, 0.45), 0 1px 3px rgba(42, 36, 32, 0.35)";

@@ -8,28 +8,34 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { colores, fuentes, tarjeta } from "./estilo";
+import { colores, fuentes, sombraTexto } from "./estilo";
 import { Previo } from "./guion";
 
-// Aparece con un fundido suave y un pequeño deslizamiento (sin rebotes) y se desvanece al final
-export const useAparecer = (retrasoFrames = 0, desplazamiento = 16) => {
+const suave = {
+  extrapolateLeft: "clamp",
+  extrapolateRight: "clamp",
+  easing: Easing.out(Easing.cubic),
+} as const;
+
+// Fundido de salida al final de la Sequence que lo contiene
+const useSalida = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
+  return interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+};
+
+// Aparece con un fundido y un pequeño deslizamiento
+export const useAparecer = (retrasoFrames = 0, desplazamiento = 16) => {
+  const frame = useCurrentFrame();
+  const salida = useSalida();
   const entrada = interpolate(
     frame,
     [retrasoFrames, retrasoFrames + 12],
     [0, 1],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
-    },
-  );
-  const salida = interpolate(
-    frame,
-    [durationInFrames - 10, durationInFrames],
-    [1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+    suave,
   );
   return {
     opacity: entrada * salida,
@@ -37,19 +43,72 @@ export const useAparecer = (retrasoFrames = 0, desplazamiento = 16) => {
   };
 };
 
-// Etiqueta pequeña en mayúsculas espaciadas (estilo editorial)
+// Velo oscuro muy suave arriba para que el texto crema se lea sobre el vídeo
+const Velo: React.FC<{ alto?: number }> = ({ alto = 45 }) => {
+  const frame = useCurrentFrame();
+  const salida = useSalida();
+  const entrada = interpolate(frame, [0, 10], [0, 1], suave);
+  return (
+    <AbsoluteFill
+      style={{
+        opacity: entrada * salida,
+        background: `linear-gradient(180deg, rgba(42,36,32,0.55) 0%, rgba(42,36,32,0.28) ${alto * 0.55}%, rgba(42,36,32,0) ${alto}%)`,
+      }}
+    />
+  );
+};
+
+// Las palabras aparecen una a una: suben y pasan de desenfocadas a nítidas
+const Revelar: React.FC<{ texto: string; retraso?: number; paso?: number }> = ({
+  texto,
+  retraso = 0,
+  paso = 4,
+}) => {
+  const frame = useCurrentFrame();
+  const lineas = texto.split("\n");
+  let i = 0;
+  return (
+    <>
+      {lineas.map((linea, l) => (
+        <div key={l}>
+          {linea.split(" ").map((palabra, w) => {
+            const desde = retraso + i++ * paso;
+            const p = interpolate(frame, [desde, desde + 14], [0, 1], suave);
+            return (
+              <span
+                key={w}
+                style={{
+                  display: "inline-block",
+                  whiteSpace: "pre",
+                  opacity: p,
+                  transform: `translateY(${(1 - p) * 34}px)`,
+                  filter: `blur(${(1 - p) * 8}px)`,
+                }}
+              >
+                {w > 0 ? " " : ""}
+                {palabra}
+              </span>
+            );
+          })}
+        </div>
+      ))}
+    </>
+  );
+};
+
+// Línea pequeña en mayúsculas espaciadas (como "BRUNCH, SHOPPING, CENA")
 export const Etiqueta: React.FC<{
   children: React.ReactNode;
   color?: string;
   tamano?: number;
   style?: React.CSSProperties;
-}> = ({ children, color = colores.marron, tamano = 26, style }) => (
+}> = ({ children, color = colores.crema, tamano = 28, style }) => (
   <div
     style={{
       fontFamily: fuentes.texto,
-      fontWeight: 500,
+      fontWeight: 400,
       fontSize: tamano,
-      letterSpacing: tamano * 0.28,
+      letterSpacing: tamano * 0.22,
       textTransform: "uppercase",
       color,
       ...style,
@@ -59,154 +118,133 @@ export const Etiqueta: React.FC<{
   </div>
 );
 
-// Título fino y amplio
+// Título en serif de alto contraste
 export const Titulo: React.FC<{
   children: React.ReactNode;
   tamano?: number;
   color?: string;
+  cursiva?: boolean;
   style?: React.CSSProperties;
-}> = ({ children, tamano = 96, color = colores.tinta, style }) => (
-  <div
-    style={{
-      fontFamily: fuentes.texto,
-      fontWeight: 300,
-      fontSize: tamano,
-      lineHeight: 1.08,
-      letterSpacing: -tamano * 0.01,
-      color,
-      whiteSpace: "pre-line",
-      ...style,
-    }}
-  >
-    {children}
-  </div>
-);
-
-// Filete fino que se dibuja de izquierda a derecha
-const Filete: React.FC<{ progreso: number; ancho: number; color?: string }> = ({
-  progreso,
-  ancho,
-  color = colores.tierra,
+}> = ({
+  children,
+  tamano = 120,
+  color = colores.crema,
+  cursiva = false,
+  style,
 }) => (
   <div
     style={{
-      width: ancho * progreso,
-      height: 1.5,
-      background: color,
-      margin: "18px auto",
-    }}
-  />
-);
-
-// Tarjeta crema centrada arriba
-const Tarjeta: React.FC<{
-  children: React.ReactNode;
-  style?: React.CSSProperties;
-}> = ({ children, style }) => (
-  <div
-    style={{
-      ...tarjeta,
-      padding: "34px 56px",
-      textAlign: "center",
+      fontFamily: fuentes.titulo,
+      fontStyle: cursiva ? "italic" : "normal",
+      fontSize: tamano,
+      lineHeight: 0.98,
+      letterSpacing: -tamano * 0.012,
+      color,
       ...style,
     }}
   >
     {children}
   </div>
 );
+
+// Bloque de título sobre el vídeo: etiqueta + título que se revela + línea en cursiva
+const Bloque: React.FC<{
+  etiqueta?: string;
+  titulo: string;
+  tamano?: number;
+  pie?: string;
+  color?: string;
+  sombra?: boolean;
+  paddingTop?: number;
+}> = ({
+  etiqueta,
+  titulo,
+  tamano = 120,
+  pie,
+  color = colores.crema,
+  sombra = true,
+  paddingTop = 150,
+}) => {
+  const a = useAparecer(0, 10);
+  const salida = useSalida();
+  const c = useAparecer(6 + titulo.split(" ").length * 4, 10);
+  return (
+    <AbsoluteFill
+      style={{
+        alignItems: "center",
+        paddingTop,
+        textAlign: "center",
+        textShadow: sombra ? sombraTexto : "none",
+      }}
+    >
+      {etiqueta ? (
+        <div style={a}>
+          <Etiqueta color={color} style={{ marginBottom: 18 }}>
+            {etiqueta}
+          </Etiqueta>
+        </div>
+      ) : null}
+      <div style={{ opacity: salida }}>
+        <Titulo tamano={tamano} color={color}>
+          <Revelar texto={titulo} retraso={4} />
+        </Titulo>
+      </div>
+      {pie ? (
+        <div style={c}>
+          <Titulo
+            tamano={tamano * 0.5}
+            color={color}
+            cursiva
+            style={{ marginTop: 16 }}
+          >
+            {pie}
+          </Titulo>
+        </div>
+      ) : null}
+    </AbsoluteFill>
+  );
+};
 
 export const FondoIntro: React.FC<{ style?: React.CSSProperties }> = ({
   style,
 }) => <AbsoluteFill style={{ backgroundColor: colores.beige, ...style }} />;
 
-const useFilete = (desde: number) => {
-  const frame = useCurrentFrame();
-  return interpolate(frame, [desde, desde + 18], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
-};
-
-// Primer clip: "planeando mi BODA EN PARÍS · ¿low cost?"
+// Primer clip: "planeando mi · Boda en París · ¿low cost?"
 export const Gancho: React.FC<{
   antes: string;
   titulo: string;
   pastilla: string;
-}> = ({ antes, titulo, pastilla }) => {
-  const a = useAparecer(0);
-  const b = useAparecer(4);
-  const c = useAparecer(12);
-  const filete = useFilete(8);
-  return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 120 }}>
-      <Tarjeta style={{ padding: "40px 70px 44px" }}>
-        <div style={a}>
-          <Etiqueta>{antes}</Etiqueta>
-        </div>
-        <div style={b}>
-          <Titulo
-            tamano={92}
-            style={{
-              marginTop: 12,
-              textTransform: "uppercase",
-              letterSpacing: 6,
-            }}
-          >
-            {titulo}
-          </Titulo>
-        </div>
-        <Filete progreso={filete} ancho={420} />
-        <div style={c}>
-          <Titulo
-            tamano={44}
-            color={colores.marron}
-            style={{ fontWeight: 400 }}
-          >
-            {pastilla}
-          </Titulo>
-        </div>
-      </Tarjeta>
-    </AbsoluteFill>
-  );
-};
+}> = ({ antes, titulo, pastilla }) => (
+  <AbsoluteFill>
+    <Velo />
+    <Bloque
+      etiqueta={antes}
+      titulo={titulo
+        .toLowerCase()
+        .replace(/(^|\s)\S/g, (l) => l.toUpperCase())
+        .replace(" En ", " en ")}
+      tamano={128}
+      pie={pastilla}
+    />
+  </AbsoluteFill>
+);
 
-// Intro del episodio sobre beige cálido
+// Intro del episodio sobre beige cálido, texto oscuro
 export const TarjetaIntro: React.FC<{
   manuscrita: string;
   titulo: string;
   pastilla: string;
-}> = ({ manuscrita, titulo, pastilla }) => {
-  const a = useAparecer(4);
-  const b = useAparecer(8);
-  const c = useAparecer(14);
-  const filete = useFilete(10);
-  return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 120 }}>
-      <div style={a}>
-        <Etiqueta>{manuscrita}</Etiqueta>
-      </div>
-      <div style={b}>
-        <Titulo
-          tamano={112}
-          style={{
-            marginTop: 14,
-            textTransform: "uppercase",
-            letterSpacing: 10,
-          }}
-        >
-          {titulo}
-        </Titulo>
-      </div>
-      <Filete progreso={filete} ancho={300} />
-      <div style={c}>
-        <Titulo tamano={36} color={colores.marron} style={{ fontWeight: 400 }}>
-          {pastilla}
-        </Titulo>
-      </div>
-    </AbsoluteFill>
-  );
-};
+}> = ({ manuscrita, titulo, pastilla }) => (
+  <Bloque
+    etiqueta={manuscrita}
+    titulo={titulo.charAt(0) + titulo.slice(1).toLowerCase()}
+    tamano={140}
+    pie={pastilla}
+    color={colores.tinta}
+    sombra={false}
+    paddingTop={110}
+  />
+);
 
 // Línea fina con un avión pequeño que cruza mientras dice "viajar"
 const Avion: React.FC = () => (
@@ -227,18 +265,15 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const a = useAparecer(0);
-  const b = useAparecer(4);
-  const visible = useAparecer(0, 0).opacity;
+  const visible = useSalida();
   const p = interpolate(frame, [4, 4 + 2 * fps], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.cubic),
   });
-  // Arco suave por debajo de la tarjeta
   const ruta = (q: number) => ({
     x: 90 + q * 900,
-    y: 560 - Math.sin(q * Math.PI) * 90,
+    y: 600 - Math.sin(q * Math.PI) * 90,
   });
   const pos = ruta(p);
   const delante = ruta(Math.min(1, p + 0.01));
@@ -251,6 +286,7 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
     .join(" ");
   return (
     <AbsoluteFill>
+      <Velo />
       <svg
         width={1080}
         height={1920}
@@ -278,148 +314,112 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
           <Avion />
         </div>
       ) : null}
-      <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
-        <Tarjeta>
-          <div style={a}>
-            <Etiqueta>{antes}</Etiqueta>
-          </div>
-          <div style={b}>
-            <Titulo tamano={100} style={{ marginTop: 10 }}>
-              {titulo}
-            </Titulo>
-          </div>
-        </Tarjeta>
-      </AbsoluteFill>
+      <Bloque etiqueta={antes} titulo={titulo} tamano={150} />
     </AbsoluteFill>
   );
 };
 
 export const TituloDidactico: React.FC<{ texto: string; sticker?: string }> = ({
   texto,
-}) => {
-  const estilo = useAparecer(0);
-  const largo = texto.length > 24;
-  return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
-      <div style={estilo}>
-        <Tarjeta style={{ maxWidth: 900 }}>
-          <Titulo tamano={largo ? 58 : 66} style={{ fontWeight: 400 }}>
-            {texto}
-          </Titulo>
-        </Tarjeta>
-      </div>
-    </AbsoluteFill>
-  );
-};
+}) => (
+  <AbsoluteFill>
+    <Velo />
+    <Bloque titulo={texto} tamano={texto.length > 24 ? 92 : 118} />
+  </AbsoluteFill>
+);
 
 export const Lista: React.FC<{
   titulo: string;
   puntos: { texto: string; enFrames: number }[];
 }> = ({ titulo, puntos }) => {
   const frame = useCurrentFrame();
-  const estilo = useAparecer(0);
+  const salida = useSalida();
+  const a = useAparecer(0, 10);
   return (
-    <AbsoluteFill
-      style={{ alignItems: "flex-end", paddingTop: 140, paddingRight: 60 }}
-    >
-      <div
-        style={{ ...estilo, ...tarjeta, width: 560, padding: "34px 44px 26px" }}
+    <AbsoluteFill>
+      <Velo alto={55} />
+      <AbsoluteFill
+        style={{
+          paddingTop: 140,
+          paddingLeft: 90,
+          textShadow: sombraTexto,
+          opacity: salida,
+        }}
       >
-        <Etiqueta>{titulo.replace(":", "")}</Etiqueta>
-        {/* Cada prioridad entra cuando la nombra; la tarjeta crece con ella */}
-        {puntos
-          .filter((p) => frame >= p.enFrames)
-          .map((p, i) => {
-            const s = interpolate(
-              frame,
-              [p.enFrames, p.enFrames + 10],
-              [0, 1],
-              {
-                extrapolateLeft: "clamp",
-                extrapolateRight: "clamp",
-                easing: Easing.out(Easing.cubic),
-              },
-            );
-            return (
-              <div
-                key={p.texto}
-                style={{
-                  display: "flex",
-                  alignItems: "baseline",
-                  gap: 22,
-                  padding: "16px 0",
-                  borderTop:
-                    i === 0 ? undefined : "1px solid rgba(111, 90, 73, 0.18)",
-                  marginTop: i === 0 ? 14 : 0,
-                  opacity: s,
-                  transform: `translateX(${(1 - s) * 14}px)`,
-                  fontFamily: fuentes.texto,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 24,
-                    fontWeight: 500,
-                    color: colores.tierra,
-                    letterSpacing: 2,
-                  }}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span
-                  style={{
-                    fontSize: 42,
-                    fontWeight: 400,
-                    color: colores.tinta,
-                  }}
-                >
-                  {p.texto}
-                </span>
-              </div>
-            );
-          })}
-      </div>
+        <div style={a}>
+          <Etiqueta style={{ marginBottom: 20 }}>
+            {titulo.replace(":", "")}
+          </Etiqueta>
+        </div>
+        {/* Cada prioridad entra cuando la nombra */}
+        {puntos.map((p, i) => {
+          const s = interpolate(
+            frame,
+            [p.enFrames, p.enFrames + 14],
+            [0, 1],
+            suave,
+          );
+          return (
+            <div
+              key={p.texto}
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: 26,
+                marginTop: 6,
+                opacity: s,
+                transform: `translateX(${(1 - s) * -24}px)`,
+                filter: `blur(${(1 - s) * 6}px)`,
+              }}
+            >
+              <Titulo tamano={46} cursiva color={colores.beige}>
+                {String(i + 1).padStart(2, "0")}
+              </Titulo>
+              <Titulo tamano={76}>{p.texto}</Titulo>
+            </div>
+          );
+        })}
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
 
-export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => {
-  const estilo = useAparecer(0);
-  return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
-      <div style={estilo}>
-        <Tarjeta style={{ maxWidth: 900 }}>
-          <Titulo tamano={60} style={{ fontWeight: 400 }}>
-            {texto}
-          </Titulo>
-        </Tarjeta>
-      </div>
-    </AbsoluteFill>
-  );
-};
+export const Pregunta: React.FC<{ texto: string }> = ({ texto }) => (
+  <AbsoluteFill>
+    <Velo />
+    <Bloque titulo={texto} tamano={96} />
+  </AbsoluteFill>
+);
 
 export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
   altoEnFrames,
 }) => {
   const bajo = useAparecer(0);
   const alto = useAparecer(altoEnFrames);
-  const opciones: [string, React.CSSProperties][] = [
-    ["Low cost", bajo],
-    ["High cost", alto],
-  ];
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 160 }}>
-      <div style={{ display: "flex", gap: 24 }}>
-        {opciones.map(([texto, estilo]) => (
-          <div key={texto} style={estilo}>
-            <Tarjeta style={{ padding: "30px 44px" }}>
-              <Titulo tamano={60} style={{ fontWeight: 400 }}>
-                {texto}
-              </Titulo>
-            </Tarjeta>
+    <AbsoluteFill>
+      <Velo />
+      <AbsoluteFill
+        style={{
+          alignItems: "center",
+          paddingTop: 170,
+          textShadow: sombraTexto,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "baseline", gap: 30 }}>
+          <div style={bajo}>
+            <Titulo tamano={100}>Low cost</Titulo>
           </div>
-        ))}
-      </div>
+          <div style={alto}>
+            <Titulo tamano={56} cursiva color={colores.beige}>
+              vs
+            </Titulo>
+          </div>
+          <div style={alto}>
+            <Titulo tamano={100}>High cost</Titulo>
+          </div>
+        </div>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
@@ -433,39 +433,51 @@ export const Contador: React.FC<{
 }> = ({ antes, cantidad, enFrames, despues }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const estilo = useAparecer(0);
+  const a = useAparecer(0, 10);
+  const b = useAparecer(4, 24);
   const subir = interpolate(
     frame,
     [enFrames - 8, enFrames + 0.8 * fps],
     [0, 1],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
-    },
+    suave,
   );
-  const filete = useFilete(enFrames + Math.round(0.8 * fps));
+  // Al llegar a la cifra, un pequeño "latido" de escala
+  const latido = interpolate(
+    frame,
+    [enFrames + 0.8 * fps, enFrames + 0.8 * fps + 6, enFrames + 0.8 * fps + 16],
+    [1, 1.06, 1],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+  );
   const valor = Math.round(cantidad * subir).toLocaleString("en-US");
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 140 }}>
-      <div style={estilo}>
-        <Tarjeta style={{ padding: "36px 80px 30px" }}>
-          <Etiqueta>{antes}</Etiqueta>
-          <Titulo
-            tamano={140}
-            style={{ marginTop: 8, fontVariantNumeric: "tabular-nums" }}
-          >
+    <AbsoluteFill>
+      <Velo />
+      <AbsoluteFill
+        style={{
+          alignItems: "center",
+          paddingTop: 150,
+          textShadow: sombraTexto,
+        }}
+      >
+        <div style={a}>
+          <Etiqueta style={{ marginBottom: 14 }}>{antes}</Etiqueta>
+        </div>
+        <div style={{ ...b, transform: `${b.transform} scale(${latido})` }}>
+          <Titulo tamano={200} style={{ fontVariantNumeric: "tabular-nums" }}>
             {`$${valor}`}
           </Titulo>
-          <Filete progreso={filete} ancho={260} />
-          {despues ? <Etiqueta tamano={22}>{despues}</Etiqueta> : null}
-        </Tarjeta>
-      </div>
+        </div>
+        {despues ? (
+          <Titulo tamano={52} cursiva style={{ marginTop: 10 }}>
+            {despues}
+          </Titulo>
+        ) : null}
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
 
-// Cierre: "sígueme para el EPISODIO 03" y el botón que pasa a "Siguiendo"
+// Cierre: "sígueme para el · Episodio 03" y el botón que pasa a "Siguiendo"
 export const Cierre: React.FC<{
   titulo: string;
   destacado: string;
@@ -473,43 +485,36 @@ export const Cierre: React.FC<{
   botonPulsado: string;
 }> = ({ titulo, destacado, boton, botonPulsado }) => {
   const frame = useCurrentFrame();
-  const estilo = useAparecer(0);
+  const c = useAparecer(14, 10);
   const pulsado = frame >= 32; // coincide con el sonido del guion
   return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 90 }}>
-      <div style={estilo}>
-        <Tarjeta style={{ padding: "30px 60px 34px" }}>
-          <Etiqueta>{titulo}</Etiqueta>
-          <Titulo
-            tamano={72}
-            style={{
-              marginTop: 10,
-              textTransform: "uppercase",
-              letterSpacing: 8,
-            }}
-          >
-            {destacado}
-          </Titulo>
-          <div
-            style={{
-              display: "inline-block",
-              marginTop: 22,
-              padding: "12px 40px",
-              borderRadius: 999,
-              border: `1px solid ${colores.marron}`,
-              background: pulsado ? colores.marron : "transparent",
-              color: pulsado ? colores.crema : colores.marron,
-              fontFamily: fuentes.texto,
-              fontWeight: 500,
-              fontSize: 28,
-              letterSpacing: 3,
-              textTransform: "uppercase",
-            }}
-          >
-            {pulsado ? botonPulsado : boton}
-          </div>
-        </Tarjeta>
-      </div>
+    <AbsoluteFill>
+      <Velo />
+      <Bloque
+        etiqueta={titulo}
+        titulo={destacado.charAt(0) + destacado.slice(1).toLowerCase()}
+        tamano={130}
+        paddingTop={120}
+      />
+      <AbsoluteFill style={{ alignItems: "center", paddingTop: 390 }}>
+        <div
+          style={{
+            ...c,
+            padding: "14px 46px",
+            borderRadius: 999,
+            border: `1.5px solid ${colores.crema}`,
+            background: pulsado ? colores.crema : "rgba(42,36,32,0.15)",
+            color: pulsado ? colores.marron : colores.crema,
+            fontFamily: fuentes.texto,
+            fontWeight: 500,
+            fontSize: 28,
+            letterSpacing: 4,
+            textTransform: "uppercase",
+          }}
+        >
+          {pulsado ? botonPulsado : boton}
+        </div>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
@@ -540,51 +545,23 @@ export const BarraProgreso: React.FC = () => {
 };
 
 // Gancho visual: el resultado final de la boda con el texto desde el primer segundo
-export const GanchoPrevio: React.FC<{ previo: Previo }> = ({ previo }) => {
-  const a = useAparecer(0, 10);
-  const b = useAparecer(3, 10);
-  const c = useAparecer(8, 10);
-  const filete = useFilete(5);
-  return (
-    <AbsoluteFill>
-      <OffthreadVideo
-        src={staticFile(previo.video)}
-        muted
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-      />
-      {/* Velo oscuro suave arriba: texto crema legible sobre cualquier toma */}
-      <AbsoluteFill
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(42,36,32,0.55) 0%, rgba(42,36,32,0.25) 30%, rgba(42,36,32,0) 48%)",
-        }}
-      />
-      <AbsoluteFill style={{ alignItems: "center", paddingTop: 130 }}>
-        <div style={a}>
-          <Etiqueta color={colores.beige} tamano={28}>
-            {previo.antes}
-          </Etiqueta>
-        </div>
-        <div style={b}>
-          <Titulo
-            tamano={104}
-            color={colores.crema}
-            style={{
-              marginTop: 14,
-              textTransform: "uppercase",
-              letterSpacing: 8,
-            }}
-          >
-            {previo.titulo}
-          </Titulo>
-        </div>
-        <Filete progreso={filete} ancho={340} color={colores.beige} />
-        <div style={c}>
-          <Titulo tamano={44} color={colores.crema} style={{ fontWeight: 400 }}>
-            {previo.banner}
-          </Titulo>
-        </div>
-      </AbsoluteFill>
-    </AbsoluteFill>
-  );
-};
+export const GanchoPrevio: React.FC<{ previo: Previo }> = ({ previo }) => (
+  <AbsoluteFill>
+    <OffthreadVideo
+      src={staticFile(previo.video)}
+      muted
+      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+    />
+    <Velo alto={50} />
+    <Bloque
+      etiqueta={previo.antes}
+      titulo={previo.titulo
+        .toLowerCase()
+        .replace(/(^|\s)\S/g, (l) => l.toUpperCase())
+        .replace(" En ", " en ")}
+      tamano={136}
+      pie={previo.banner}
+      paddingTop={120}
+    />
+  </AbsoluteFill>
+);
