@@ -8,7 +8,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { colores, fuentes, sombraTexto } from "./estilo";
+import { colores, fuentes, sombraTexto, zonaSegura } from "./estilo";
 import { Previo } from "./guion";
 
 const suave = {
@@ -207,7 +207,7 @@ const Bloque: React.FC<{
   pie,
   color = colores.crema,
   sombra = true,
-  paddingTop = 150,
+  paddingTop = zonaSegura.arriba,
   banner = false,
   mayusculas = false,
   children,
@@ -217,9 +217,19 @@ const Bloque: React.FC<{
   const salida = useSalida();
   const c = useAparecer(10 + titulo.split(" ").length * 4, 10);
   // Mayúsculas: las letras llegan separadas y se juntan (como una portada de revista)
+  // El texto nunca pasa del ancho visible en Reels (más estrecho dentro del banner)
+  const anchoMax = banner ? zonaSegura.ancho - 140 : zonaSegura.ancho;
+  const lineaMasLarga = Math.max(...titulo.split("\n").map((l) => l.length));
+  const tamanoTitulo = Math.min(
+    tamano,
+    anchoMax / (lineaMasLarga * (mayusculas ? 0.8 : 0.5)),
+  );
+  const tamanoPie = pie
+    ? Math.min(tamanoTitulo * 0.5, anchoMax / (pie.length * 0.42))
+    : 0;
   const espaciado = mayusculas
-    ? interpolate(frame, [0, 26], [0.32, 0.06], suave) * tamano
-    : -tamano * 0.012;
+    ? interpolate(frame, [0, 26], [0.16, 0.06], suave) * tamanoTitulo
+    : -tamanoTitulo * 0.012;
   const contenido = (
     <>
       {etiqueta ? (
@@ -235,7 +245,7 @@ const Bloque: React.FC<{
       ) : null}
       <div style={{ opacity: banner ? 1 : salida }}>
         <Titulo
-          tamano={tamano}
+          tamano={tamanoTitulo}
           color={color}
           style={{ letterSpacing: espaciado }}
         >
@@ -245,7 +255,7 @@ const Bloque: React.FC<{
       {pie ? (
         <div style={c}>
           <Titulo
-            tamano={tamano * 0.5}
+            tamano={tamanoPie}
             color={color}
             cursiva
             style={{ marginTop: 16 }}
@@ -267,7 +277,7 @@ const Bloque: React.FC<{
       }}
     >
       {banner ? (
-        <Banner style={{ maxWidth: 940 }}>{contenido}</Banner>
+        <Banner style={{ maxWidth: zonaSegura.ancho }}>{contenido}</Banner>
       ) : (
         contenido
       )}
@@ -310,7 +320,6 @@ export const TarjetaIntro: React.FC<{
     pie={pastilla}
     color={colores.tinta}
     sombra={false}
-    paddingTop={110}
   />
 );
 
@@ -340,8 +349,8 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
     easing: Easing.inOut(Easing.cubic),
   });
   const ruta = (q: number) => ({
-    x: 90 + q * 900,
-    y: 600 - Math.sin(q * Math.PI) * 90,
+    x: 150 + q * 780,
+    y: 820 - Math.sin(q * Math.PI) * 90,
   });
   const pos = ruta(p);
   const delante = ruta(Math.min(1, p + 0.01));
@@ -381,13 +390,7 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
           <Avion />
         </div>
       ) : null}
-      <Bloque
-        etiqueta={antes}
-        titulo={titulo}
-        tamano={96}
-        banner
-        paddingTop={140}
-      />
+      <Bloque etiqueta={antes} titulo={titulo} tamano={96} banner />
     </AbsoluteFill>
   );
 };
@@ -396,12 +399,7 @@ export const TituloDidactico: React.FC<{ texto: string; sticker?: string }> = ({
   texto,
 }) => (
   <AbsoluteFill>
-    <Bloque
-      titulo={texto}
-      tamano={texto.length > 24 ? 62 : 78}
-      banner
-      paddingTop={150}
-    />
+    <Bloque titulo={texto} tamano={texto.length > 24 ? 62 : 78} banner />
   </AbsoluteFill>
 );
 
@@ -414,10 +412,10 @@ export const Lista: React.FC<{
   const a = useAparecer(0, 10);
   return (
     <AbsoluteFill
-      style={{ alignItems: "flex-end", paddingTop: 140, paddingRight: 60 }}
+      style={{ alignItems: "center", paddingTop: zonaSegura.arriba }}
     >
       <Banner
-        style={{ width: 600, padding: "34px 50px 30px", opacity: salida }}
+        style={{ width: 640, padding: "34px 50px 30px", opacity: salida }}
       >
         <div style={a}>
           <Etiqueta tamano={24} style={{ marginBottom: 14 }}>
@@ -472,7 +470,9 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
   const alto = useAparecer(altoEnFrames);
   return (
     <AbsoluteFill>
-      <AbsoluteFill style={{ alignItems: "center", paddingTop: 170 }}>
+      <AbsoluteFill
+        style={{ alignItems: "center", paddingTop: zonaSegura.arriba }}
+      >
         <Banner>
           <div style={{ display: "flex", alignItems: "baseline", gap: 30 }}>
             <div style={bajo}>
@@ -520,7 +520,9 @@ export const Contador: React.FC<{
   const valor = Math.round(cantidad * subir).toLocaleString("en-US");
   return (
     <AbsoluteFill>
-      <AbsoluteFill style={{ alignItems: "center", paddingTop: 150 }}>
+      <AbsoluteFill
+        style={{ alignItems: "center", paddingTop: zonaSegura.arriba }}
+      >
         <Banner style={{ padding: "34px 90px 30px", textAlign: "center" }}>
           <div style={a}>
             <Etiqueta tamano={24} style={{ marginBottom: 10 }}>
@@ -528,7 +530,7 @@ export const Contador: React.FC<{
             </Etiqueta>
           </div>
           <div style={{ ...b, transform: `${b.transform} scale(${latido})` }}>
-            <Titulo tamano={150} style={{ fontVariantNumeric: "tabular-nums" }}>
+            <Titulo tamano={130} style={{ fontVariantNumeric: "tabular-nums" }}>
               {`$${valor}`}
             </Titulo>
           </div>
@@ -558,7 +560,6 @@ export const Cierre: React.FC<{
       etiqueta={titulo}
       titulo={destacado.charAt(0) + destacado.slice(1).toLowerCase()}
       tamano={92}
-      paddingTop={110}
       banner
     >
       <div
@@ -624,7 +625,6 @@ export const GanchoPrevio: React.FC<{ previo: Previo }> = ({ previo }) => (
       tamano={118}
       mayusculas
       pie={previo.banner}
-      paddingTop={120}
     />
   </AbsoluteFill>
 );

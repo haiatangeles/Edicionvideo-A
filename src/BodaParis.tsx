@@ -60,14 +60,14 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
-  const escalaVideo = interpolate(tarjeta, [0, 1], [1, 0.66]);
+  const escalaVideo = interpolate(tarjeta, [0, 1], [1, 0.58]);
 
   return (
     <AbsoluteFill style={{ backgroundColor: colores.crema }}>
       <FondoIntro style={{ opacity: tarjeta }} />
       <AbsoluteFill
         style={{
-          transform: `translateY(${tarjeta * 190}px) scale(${escalaVideo})`,
+          transform: `translateY(${tarjeta * 330}px) scale(${escalaVideo})`,
           transformOrigin: "50% 38%",
           border:
             tarjeta > 0

@@ -26,3 +26,10 @@ export const fuentes = {
 // Sombra suave para que el texto crema se lea sobre el vídeo
 export const sombraTexto =
   "0 2px 18px rgba(42, 36, 32, 0.45), 0 1px 3px rgba(42, 36, 32, 0.35)";
+
+// Zona segura de Instagram Reels: arriba están los botones de la app y a los lados
+// el móvil recorta un poco el vídeo. Todo texto empieza más abajo y no pasa de este ancho.
+export const zonaSegura = {
+  arriba: 300,
+  ancho: 780,
+};
