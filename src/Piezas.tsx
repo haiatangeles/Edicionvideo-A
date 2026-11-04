@@ -8,7 +8,13 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { colores, fuentes, sombraTexto, zonaSegura } from "./estilo";
+import {
+  colores,
+  fuentes,
+  margenAbajo,
+  sombraTexto,
+  zonaSegura,
+} from "./estilo";
 import { Previo } from "./guion";
 
 const suave = {
@@ -43,8 +49,11 @@ export const useAparecer = (retrasoFrames = 0, desplazamiento = 16) => {
   };
 };
 
-// Velo oscuro muy suave arriba para que el texto crema se lea sobre el vídeo
-const Velo: React.FC<{ alto?: number }> = ({ alto = 45 }) => {
+// Velo oscuro muy suave (arriba o abajo) para que el texto crema se lea sobre el vídeo
+const Velo: React.FC<{ alto?: number; abajo?: boolean }> = ({
+  alto = 45,
+  abajo = false,
+}) => {
   const frame = useCurrentFrame();
   const salida = useSalida();
   const entrada = interpolate(frame, [0, 10], [0, 1], suave);
@@ -52,7 +61,7 @@ const Velo: React.FC<{ alto?: number }> = ({ alto = 45 }) => {
     <AbsoluteFill
       style={{
         opacity: entrada * salida,
-        background: `linear-gradient(180deg, rgba(42,36,32,0.55) 0%, rgba(42,36,32,0.28) ${alto * 0.55}%, rgba(42,36,32,0) ${alto}%)`,
+        background: `linear-gradient(${abajo ? 0 : 180}deg, rgba(42,36,32,0.55) 0%, rgba(42,36,32,0.28) ${alto * 0.55}%, rgba(42,36,32,0) ${alto}%)`,
       }}
     />
   );
@@ -197,6 +206,7 @@ const Bloque: React.FC<{
   color?: string;
   sombra?: boolean;
   paddingTop?: number;
+  arriba?: boolean;
   banner?: boolean;
   mayusculas?: boolean;
   children?: React.ReactNode;
@@ -208,6 +218,7 @@ const Bloque: React.FC<{
   color = colores.crema,
   sombra = true,
   paddingTop = zonaSegura.arriba,
+  arriba = false,
   banner = false,
   mayusculas = false,
   children,
@@ -271,9 +282,11 @@ const Bloque: React.FC<{
     <AbsoluteFill
       style={{
         alignItems: "center",
-        paddingTop,
         textAlign: "center",
         textShadow: sombra && !banner ? sombraTexto : "none",
+        ...(arriba
+          ? { paddingTop }
+          : { justifyContent: "flex-end", paddingBottom: margenAbajo }),
       }}
     >
       {banner ? (
@@ -296,7 +309,7 @@ export const Gancho: React.FC<{
   pastilla: string;
 }> = ({ antes, titulo, pastilla }) => (
   <AbsoluteFill>
-    <Velo />
+    <Velo abajo alto={40} />
     <Bloque
       etiqueta={antes}
       titulo={titulo}
@@ -320,6 +333,7 @@ export const TarjetaIntro: React.FC<{
     pie={pastilla}
     color={colores.tinta}
     sombra={false}
+    arriba
   />
 );
 
@@ -350,7 +364,7 @@ export const Viajes: React.FC<{ antes: string; titulo: string }> = ({
   });
   const ruta = (q: number) => ({
     x: 150 + q * 780,
-    y: 820 - Math.sin(q * Math.PI) * 90,
+    y: 1190 - Math.sin(q * Math.PI) * 70,
   });
   const pos = ruta(p);
   const delante = ruta(Math.min(1, p + 0.01));
@@ -412,7 +426,11 @@ export const Lista: React.FC<{
   const a = useAparecer(0, 10);
   return (
     <AbsoluteFill
-      style={{ alignItems: "center", paddingTop: zonaSegura.arriba }}
+      style={{
+        alignItems: "center",
+        justifyContent: "flex-end",
+        paddingBottom: margenAbajo,
+      }}
     >
       <Banner
         style={{ width: 640, padding: "34px 50px 30px", opacity: salida }}
@@ -445,10 +463,10 @@ export const Lista: React.FC<{
                   filter: `blur(${(1 - s) * 6}px)`,
                 }}
               >
-                <Titulo tamano={34} cursiva color={colores.beige}>
+                <Titulo tamano={30} cursiva color={colores.beige}>
                   {String(i + 1).padStart(2, "0")}
                 </Titulo>
-                <Titulo tamano={54}>{p.texto}</Titulo>
+                <Titulo tamano={46}>{p.texto}</Titulo>
               </div>
             );
           })}
@@ -471,7 +489,11 @@ export const Comparativa: React.FC<{ altoEnFrames: number }> = ({
   return (
     <AbsoluteFill>
       <AbsoluteFill
-        style={{ alignItems: "center", paddingTop: zonaSegura.arriba }}
+        style={{
+          alignItems: "center",
+          justifyContent: "flex-end",
+          paddingBottom: margenAbajo,
+        }}
       >
         <Banner>
           <div style={{ display: "flex", alignItems: "baseline", gap: 30 }}>
@@ -521,7 +543,11 @@ export const Contador: React.FC<{
   return (
     <AbsoluteFill>
       <AbsoluteFill
-        style={{ alignItems: "center", paddingTop: zonaSegura.arriba }}
+        style={{
+          alignItems: "center",
+          justifyContent: "flex-end",
+          paddingBottom: margenAbajo,
+        }}
       >
         <Banner style={{ padding: "34px 90px 30px", textAlign: "center" }}>
           <div style={a}>
@@ -625,6 +651,7 @@ export const GanchoPrevio: React.FC<{ previo: Previo }> = ({ previo }) => (
       tamano={118}
       mayusculas
       pie={previo.banner}
+      arriba
     />
   </AbsoluteFill>
 );

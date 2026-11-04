@@ -1,12 +1,13 @@
 import { Composition } from "remotion";
 import { EpisodioCompleto } from "./BodaParis";
 import { duracionTotal, episodio1, Guion } from "./guion";
-import { episodio2, episodio2Corto } from "./guion-ep2";
+import { episodio2, episodio2Corto, episodio2Reel } from "./guion-ep2";
 
 const episodios: [string, Guion][] = [
   ["Episodio1", episodio1],
   ["Episodio2", episodio2],
   ["Episodio2Corto", episodio2Corto],
+  ["Episodio2Reel", episodio2Reel],
 ];
 
 export const RemotionRoot: React.FC = () => {

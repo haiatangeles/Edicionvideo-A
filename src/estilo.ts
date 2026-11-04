@@ -29,7 +29,13 @@ export const sombraTexto =
 
 // Zona segura de Instagram Reels: arriba están los botones de la app y a los lados
 // el móvil recorta un poco el vídeo. Todo texto empieza más abajo y no pasa de este ancho.
+// Para no tapar la cara, en el "prepárate conmigo" los textos van abajo: entre la barbilla
+// y la zona de la descripción de Instagram (que empieza hacia y = 1480).
 export const zonaSegura = {
   arriba: 300,
-  ancho: 780,
+  abajo: 1480,
+  ancho: 720,
 };
+
+// Margen inferior para colocar textos justo encima de la zona de Instagram
+export const margenAbajo = 1920 - zonaSegura.abajo;

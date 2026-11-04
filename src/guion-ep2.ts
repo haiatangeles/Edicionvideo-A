@@ -151,3 +151,19 @@ export const episodio2Corto: Guion = {
     [94.6, 102.1], // "acompáñame al tercer vídeo…"
   ],
 };
+
+// Versión Reel: los mismos cortes que hizo ella en su edición (tiempos del vídeo original)
+export const episodio2Reel: Guion = {
+  ...episodio2,
+  cortes: [
+    [0.6, 7.9],
+    [8.95, 16.95],
+    [17.75, 30.75],
+    [31.12, 57.22],
+    [58.22, 64.42],
+    [66.01, 81.31],
+    [85.98, 93.58],
+    [94.09, 97.99],
+    [97.99, 107.4],
+  ],
+};
