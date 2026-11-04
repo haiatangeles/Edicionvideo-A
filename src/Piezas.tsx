@@ -229,11 +229,16 @@ const Bloque: React.FC<{
   const c = useAparecer(10 + titulo.split(" ").length * 4, 10);
   // Mayúsculas: las letras llegan separadas y se juntan (como una portada de revista)
   // El texto nunca pasa del ancho visible en Reels (más estrecho dentro del banner)
-  const anchoMax = banner ? zonaSegura.ancho - 140 : zonaSegura.ancho;
+  // Arriba no hay iconos de Instagram, así que el texto puede ser algo más ancho
+  const anchoMax = banner
+    ? zonaSegura.ancho - 140
+    : arriba
+      ? zonaSegura.ancho + 80
+      : zonaSegura.ancho;
   const lineaMasLarga = Math.max(...titulo.split("\n").map((l) => l.length));
   const tamanoTitulo = Math.min(
     tamano,
-    anchoMax / (lineaMasLarga * (mayusculas ? 0.8 : 0.5)),
+    anchoMax / (lineaMasLarga * (mayusculas ? 0.62 : 0.5)),
   );
   const tamanoPie = pie
     ? Math.min(tamanoTitulo * 0.5, anchoMax / (pie.length * 0.42))
@@ -247,7 +252,7 @@ const Bloque: React.FC<{
         <div style={a}>
           <Etiqueta
             color={color}
-            tamano={banner ? 22 : 28}
+            tamano={banner ? 22 : 32}
             style={{ marginBottom: banner ? 12 : 18 }}
           >
             {etiqueta}
@@ -309,8 +314,10 @@ export const Gancho: React.FC<{
   pastilla: string;
 }> = ({ antes, titulo, pastilla }) => (
   <AbsoluteFill>
-    <Velo abajo alto={40} />
+    <Velo alto={35} />
     <Bloque
+      arriba
+      paddingTop={270}
       etiqueta={antes}
       titulo={titulo}
       tamano={112}
