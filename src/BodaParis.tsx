@@ -96,7 +96,11 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
         ))}
       </AbsoluteFill>
 
-      <Sequence name="Gancho" durationInFrames={fs(gancho.hasta)}>
+      <Sequence
+        name="Gancho"
+        from={fs(gancho.desde ?? 0)}
+        durationInFrames={fs(gancho.hasta) - fs(gancho.desde ?? 0)}
+      >
         <Gancho
           antes={gancho.antes}
           titulo={gancho.titulo}
@@ -135,20 +139,24 @@ export const BodaParis: React.FC<{ guion: Guion }> = ({ guion }) => {
             <TituloDidactico texto={t.texto} sticker={t.sticker} />
           </Sequence>
         ))}
-      {contador && cabe(contador.desde, contador.hasta) ? (
-        <Sequence
-          name="Contador"
-          from={fs(contador.desde)}
-          durationInFrames={fs(contador.hasta) - fs(contador.desde)}
-        >
-          <Contador
-            antes={contador.antes}
-            cantidad={contador.cantidad}
-            enFrames={fs(contador.en) - fs(contador.desde)}
-            despues={contador.despues}
-          />
-        </Sequence>
-      ) : null}
+      {[...(contador ? [contador] : []), ...(guion.contadores ?? [])]
+        .filter((c) => cabe(c.desde, c.hasta))
+        .map((c) => (
+          <Sequence
+            key={c.desde}
+            name={`Contador ${c.cantidad}`}
+            from={fs(c.desde)}
+            durationInFrames={fs(c.hasta) - fs(c.desde)}
+          >
+            <Contador
+              antes={c.antes}
+              cantidad={c.cantidad}
+              enFrames={fs(c.en) - fs(c.desde)}
+              despues={c.despues}
+              moneda={c.moneda}
+            />
+          </Sequence>
+        ))}
       {lista && cabe(lista.desde, lista.hasta) ? (
         <Sequence
           name="Lista"

@@ -16,7 +16,13 @@ export type Guion = {
   previo?: Previo;
   video: string;
   duracionSeg: number;
-  gancho: { hasta: number; antes: string; titulo: string; pastilla: string };
+  gancho: {
+    desde?: number; // por defecto 0 (si el vídeo ya trae su propio gancho, empieza después)
+    hasta: number;
+    antes: string;
+    titulo: string;
+    pastilla: string;
+  };
   intro: Tramo & { manuscrita: string; titulo: string; pastilla: string };
   viajes?: Tramo & { antes: string; titulo: string };
   titulos: (Tramo & { texto: string; sticker: string })[];
@@ -25,7 +31,15 @@ export type Guion = {
     cantidad: number;
     en: number;
     despues?: string;
+    moneda?: "$" | "€";
   };
+  contadores?: (Tramo & {
+    antes: string;
+    cantidad: number;
+    en: number;
+    despues?: string;
+    moneda?: "$" | "€";
+  })[];
   lista?: Tramo & { titulo: string; puntos: { texto: string; en: number }[] };
   pregunta?: Tramo & { texto: string };
   comparativa?: Tramo & { low: number; high: number };

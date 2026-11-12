@@ -528,7 +528,8 @@ export const Contador: React.FC<{
   cantidad: number;
   enFrames: number;
   despues?: string;
-}> = ({ antes, cantidad, enFrames, despues }) => {
+  moneda?: "$" | "€";
+}> = ({ antes, cantidad, enFrames, despues, moneda = "$" }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const a = useAparecer(0, 10);
@@ -546,7 +547,11 @@ export const Contador: React.FC<{
     [1, 1.06, 1],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
-  const valor = Math.round(cantidad * subir).toLocaleString("en-US");
+  // $5,000 (como en el episodio 2) o 2.500 € (formato europeo)
+  const numero = Math.round(cantidad * subir)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, moneda === "€" ? "." : ",");
+  const valor = moneda === "€" ? `${numero} €` : `$${numero}`;
   return (
     <AbsoluteFill>
       <AbsoluteFill
@@ -564,7 +569,7 @@ export const Contador: React.FC<{
           </div>
           <div style={{ ...b, transform: `${b.transform} scale(${latido})` }}>
             <Titulo tamano={130} style={{ fontVariantNumeric: "tabular-nums" }}>
-              {`$${valor}`}
+              {valor}
             </Titulo>
           </div>
           {despues ? (
