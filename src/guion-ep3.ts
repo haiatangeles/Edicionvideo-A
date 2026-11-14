@@ -88,12 +88,9 @@ export const episodio3: Guion = {
   sonidos: [
     { en: 4.69, archivo: "whoosh", volumen: 0.3 }, // del gancho de la boda al GRWM
     { en: 7.7, archivo: "whoosh", volumen: 0.3 }, // entra la tarjeta del episodio
-    { en: 13.5, archivo: "ding", volumen: 0.35 }, // el contador llega a $5,000
-    { en: 13.55, archivo: "brillos", volumen: 0.2 },
     { en: 22.6, archivo: "click", volumen: 0.4 }, // cada cosa de la lista
     { en: 24.6, archivo: "click", volumen: 0.4 },
     { en: 25.2, archivo: "click", volumen: 0.4 },
-    { en: 30.6, archivo: "ding", volumen: 0.35 }, // el contador llega a 2.500 €
     { en: 67.1, archivo: "brillos", volumen: 0.2 }, // "me encanta"
     { en: 83.37, archivo: "click", volumen: 0.45 }, // pulsa "Seguir"
     { en: 83.42, archivo: "ding", volumen: 0.3 },
